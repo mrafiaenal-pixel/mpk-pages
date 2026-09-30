@@ -8,7 +8,7 @@ class DivisionMemberController extends Controller
 {
     public function store(Request $request) {
         $validate = $request->validate([
-            ''
-        ])
+            '' => 'required',
+        ]);
     }
 }

@@ -115,7 +115,7 @@
                             <input :type="showPassword ? 'text' : 'password'" id="password" name="password" required
                                    placeholder="••••••••"
                                    class="w-full pl-10 pr-11 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition-all outline-hidden text-slate-900">
-                            <button type="button" @click="showPassword = !showPassword" 
+                            <button type="button" @click="showPassword = !showPassword"
                                     class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                                     tabindex="-1">
                                 <i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
@@ -126,31 +126,25 @@
                     <!-- Remember Me -->
                     <div class="flex items-center">
                         <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" name="remember" value="1" 
+                            <input type="checkbox" name="remember" value="1"
                                    class="w-4 h-4 text-blue-600 rounded-sm border-slate-300 focus:ring-blue-500">
                             <span class="text-xs font-medium text-slate-600">Ingat sesi saya di perangkat ini</span>
                         </label>
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" 
+                    <button type="submit"
                             class="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 transform hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
                         <span>Masuk Sekarang</span>
                     </button>
                 </form>
 
-                <!-- Demo Credentials Box -->
-                <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-100 text-xs text-slate-600 space-y-1">
-                    <p class="font-bold text-blue-900 flex items-center gap-1.5">
-                        <i class="fa-solid fa-circle-info text-blue-600"></i> Akun Demo Tersedia:
-                    </p>
-                    <p class="text-slate-600">Username: <code class="font-bold text-slate-800 bg-white px-1.5 py-0.5 rounded border border-blue-200">admin_mpk</code> | Sandi: <code class="font-bold text-slate-800 bg-white px-1.5 py-0.5 rounded border border-blue-200">password</code></p>
-                </div>
+
 
                 <!-- Register Footer Link -->
                 <div class="text-center pt-2 text-xs text-slate-500">
-                    Belum memiliki akun? 
+                    Belum memiliki akun?
                     <a href="{{ route('register') }}" class="font-bold text-blue-600 hover:text-blue-700 transition-colors ml-1">
                         Daftar sekarang
                     </a>
