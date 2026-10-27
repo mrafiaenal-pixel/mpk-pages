@@ -2,138 +2,179 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AnggotaSekbid;
-use App\Models\AspekPenilaian;
 use App\Models\Aspiration;
 use App\Models\Assesment;
 use App\Models\Division;
 use App\Models\DivisionMember;
-use App\Models\Penilaian;
-use App\Models\ProgramKerja;
-use App\Models\Sekbid;
+use App\Models\User;
 use App\Models\WorkProgram;
+use App\Services\PenilaianFilter;
+use App\Services\PenilaiSkor;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function __construct(private readonly PenilaianFilter $filter) {}
+
+    public function dashboard(Request $request)
     {
-        $totalSekbid = Division::count();
-        $totalAnggota = DivisionMember::count();
-        $totalAspirasi = Aspiration::count();
+        $user = $request->user();
+
         $totalProgja = WorkProgram::count();
         $progjaSelesai = WorkProgram::where('status_progja', 'terlaksana')->count();
-        $persentaseProgja = $totalProgja > 0 ? round(($progjaSelesai / $totalProgja) * 100) : 0;
 
-        $aspirasiMenunggu = Aspiration::where('status_aspirasi', 'menunggu')->count();
-        $aspirasiProses = Aspiration::where('status_aspirasi', 'proses')->count();
-        $aspirasiSelesai = Aspiration::where('status_aspirasi', 'selesai')->count();
+        // Rekap penilaian dibatasi pada cakupan divisi pengguna.
+        $penilaians = $this->filter->build($request, $user)->get();
+        $nilaiTerdaftar = $penilaians->pluck('aspect')->filter()->pluck('nilai')->filter(fn ($n): bool => $n !== null);
+        $rataNilai = $nilaiTerdaftar->isEmpty() ? 0.0 : round($nilaiTerdaftar->avg(), 2);
 
-        // Recent Penilaian
-        $recentPenilaian = Assesment::with(['anggotaSekbid.division', 'user', 'aspect'])
-            ->latest('id')
-            ->take(5)
-            ->get();
+        // Distribusi predikat untuk donut chart dashboard.
+        $distribusiPredikat = $nilaiTerdaftar
+            ->map(fn ($n): string => PenilaiSkor::predikat($n))
+            ->countBy()
+            ->map(fn (int $jumlah, string $label): array => ['label' => $label, 'jumlah' => $jumlah])
+            ->sortByDesc('jumlah')
+            ->values();
 
-        // Recent Aspirasi
-        $recentAspirasi = Aspiration::with('category')
-            ->latest('id_aspirasi')
-            ->take(5)
-            ->get();
-
-        return view('admin.dashboard', compact(
-            'totalSekbid',
-            'totalAnggota',
-            'totalAspirasi',
-            'totalProgja',
-            'persentaseProgja',
-            'aspirasiMenunggu',
-            'aspirasiProses',
-            'aspirasiSelesai',
-            'recentPenilaian',
-            'recentAspirasi'
-        ));
+        return view('admin.dashboard', [
+            'totalSekbid' => Division::count(),
+            'totalAnggota' => DivisionMember::visibleTo($user)->count(),
+            'totalAspirasi' => Aspiration::count(),
+            'totalProgja' => $totalProgja,
+            'persentaseProgja' => $totalProgja > 0 ? round(($progjaSelesai / $totalProgja) * 100) : 0,
+            'aspirasiMenunggu' => Aspiration::where('status_aspirasi', 'menunggu')->count(),
+            'aspirasiProses' => Aspiration::where('status_aspirasi', 'proses')->count(),
+            'aspirasiSelesai' => Aspiration::where('status_aspirasi', 'selesai')->count(),
+            'totalPenilaian' => $nilaiTerdaftar->count(),
+            'rataNilai' => $rataNilai,
+            'predikat' => PenilaiSkor::predikat($rataNilai),
+            'distribusiPredikat' => $distribusiPredikat,
+            'rekapSekbid' => $this->rekapSekbid($penilaians),
+            'rekapAspek' => $this->rekapAspek($penilaians),
+            'trenBulanan' => $this->trenBulanan($penilaians),
+            'recentPenilaian' => $penilaians->take(5),
+            'recentAspirasi' => Aspiration::with('category')->latest('id_aspirasi')->take(5)->get(),
+        ]);
     }
 
     public function sekbid()
     {
-        $sekbids = Division::with('members')->get();
+        $user = request()->user();
 
-        return view('admin.sekbid', compact('sekbids'));
+        $sekbids = Division::with(['members', 'assessors'])
+            ->when($user->isDivisionScoped(), fn (Builder $q) => $q->whereKey($user->accessibleDivisionId()))
+            ->orderBy('nama_sekbid')
+            ->get();
+
+        return view('admin.sekbid', [
+            'sekbids' => $sekbids,
+            'daftarMpk' => User::where('role', 'mpk')->orderBy('username')->get(),
+            'canKelolaPenugasan' => ! $user->isDivisionScoped(),
+        ]);
     }
 
-    public function penilaian()
+    /**
+     * Tentukan MPK penanggung jawab satu seksi bidang. Setiap MPK hanya
+     * boleh memegang satu divisi.
+     */
+    public function updatePenugasanSekbid(Request $request, Division $divisi)
     {
-        $penilaians = Assesment::with(['anggotaSekbid.division', 'user', 'aspect'])
-            ->latest('id')
-            ->paginate(10);
-
-        $anggotaList = DivisionMember::with('division')->get();
-
-        return view('admin.penilaian', compact('penilaians', 'anggotaList'));
-    }
-
-    public function storePenilaian(Request $request)
-    {
-        $validated = $request->validate([
-            'id_anggota_sekbid' => 'required|exists:tb_anggota_sekbid,id',
-            'keaktifan_gds' => 'required|in:hadir,telat 1x,telat 2x,telat 3x,izin/lainnya,tidak hadir',
-            'piket_ro' => 'required|in:hadir,tidak ada jadwal,tanpa keterangan,izin/sakit,tidak bagiannya',
-            'kekompakan' => 'required|in:ramai aktif,sepi ada komunikasi,ramai saat progja,grup mati',
-            'komunikasi' => 'required|in:baik responsif,lambat merespon,sulit koordinasi,tidak berkomunikasi',
-            'kehadiran_rapat' => 'required|in:tepat waktu,telat,tanpa keterangan,izin alasan jelas,sakit',
-            'kegiatan_progja' => 'required|in:sesuai job,kurang maksimal,tidak ikut alasan,tidak ada progja',
-            'inisiatif_bantuan' => 'nullable|boolean',
-            'catatan_terhadap_anggota' => 'nullable|string|max:1000',
-            'tanggal_penilaian' => 'required|date',
-        ]);
-
-        $aspek = AspekPenilaian::create([
-            'keaktifan_gds' => $validated['keaktifan_gds'],
-            'piket_ro' => $validated['piket_ro'],
-            'kekompakan' => $validated['kekompakan'],
-            'komunikasi' => $validated['komunikasi'],
-            'kehadiran_rapat' => $validated['kehadiran_rapat'],
-            'kegiatan_progja' => $validated['kegiatan_progja'],
-            'inisiatif_bantuan' => $request->boolean('inisiatif_bantuan'),
-            'catatan_terhadap_anggota' => $validated['catatan_terhadap_anggota'] ?? null,
-            'tanggal_penilaian' => $validated['tanggal_penilaian'],
-        ]);
-
-        Assesment::create([
-            'id_anggota_sekbid' => $validated['id_anggota_sekbid'],
-            'id_users' => auth()->id(),
-            'id_aspek_penilaian' => $aspek->id,
-        ]);
-
-        return redirect()->route('admin.penilaian')
-            ->with('success', 'Penilaian kinerja anggota sekbid berhasil disimpan!');
-    }
-
-    public function aspirasi(Request $request)
-    {
-        $query = Aspiration::with('category')->latest('id_aspirasi');
-
-        if ($request->filled('status')) {
-            $query->where('status_aspirasi', $request->status);
+        // Hanya MPK tanpa assignment (ketua) yang boleh menetapkan penugasan.
+        if ($request->user()->isDivisionScoped()) {
+            return back()->with('error', 'Hanya MPK utama yang dapat mengubah penugasan sekbid.');
         }
 
-        $aspirasis = $query->paginate(10);
+        $validated = $request->validate([
+            'id_users' => ['nullable', Rule::exists('users', 'id_users')],
+        ]);
 
-        return view('admin.aspirasi', compact('aspirasis'));
+        // Lepaskan MPK lama sekbid ini maupun MPK yang sebelumnya ditugaskan ke sini.
+        User::where('id_sekbid', $divisi->id)->update(['id_sekbid' => null]);
+
+        $user = isset($validated['id_users']) ? User::find($validated['id_users']) : null;
+
+        if ($user !== null) {
+            $user->forceFill(['id_sekbid' => $divisi->id])->save();
+        }
+
+        return back()->with('success', $user === null
+            ? "Penugasan MPK untuk {$divisi->nama_sekbid} berhasil dikosongkan."
+            : "{$user->username} kini menangani {$divisi->nama_sekbid}.");
     }
 
-    public function updateAspirasiStatus(Request $request, $id)
+    /**
+     * Rata-rata nilai per sekbid untuk chart dashboard.
+     *
+     * @param  Collection<int, Assesment>  $penilaians
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function rekapSekbid(Collection $penilaians): Collection
     {
-        $request->validate([
-            'status_aspirasi' => 'required|in:menunggu,proses,selesai,ditolak',
-        ]);
+        return $penilaians
+            ->groupBy(fn (Assesment $item): string => $item->divisionMember?->division?->nama_sekbid ?? 'Tanpa Sekbid')
+            ->map(function (Collection $grup): array {
+                $nilai = $grup->pluck('aspect')->filter()->pluck('nilai')->filter(fn ($n): bool => $n !== null);
 
-        $aspirasi = Aspiration::findOrFail($id);
-        $aspirasi->update([
-            'status_aspirasi' => $request->status_aspirasi,
-        ]);
+                return [
+                    'nama' => $grup->first()->divisionMember?->division?->nama_sekbid ?? 'Tanpa Sekbid',
+                    'rata_nilai' => $nilai->isEmpty() ? 0.0 : round($nilai->avg(), 2),
+                    'jumlah' => $nilai->count(),
+                ];
+            })
+            ->sortByDesc('rata_nilai')
+            ->values();
+    }
 
-        return redirect()->back()->with('success', 'Status aspirasi #' . $id . ' berhasil diperbarui!');
+    /**
+     * Rata-rata nilai dan jumlah penilaian per bulan.
+     *
+     * @param  Collection<int, Assesment>  $penilaians
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function trenBulanan(Collection $penilaians): Collection
+    {
+        $terisi = $penilaians->filter(fn (Assesment $item): bool => $item->aspect?->tanggal_penilaian !== null);
+
+        // Pastikan ada minimal 6 bulan agar garis tren tetap terbaca.
+        $periode = collect(range(5, 0))
+            ->map(fn (int $mundur): string => now()->subMonths($mundur)->format('Y-m'))
+            ->values();
+
+        return $periode->map(function (string $key) use ($terisi): array {
+            $grup = $terisi->filter(fn (Assesment $item): bool => $item->aspect->tanggal_penilaian->format('Y-m') === $key);
+            $nilai = $grup->pluck('aspect')->filter()->pluck('nilai')->filter(fn ($n): bool => $n !== null);
+
+            return [
+                'periode' => Carbon::createFromFormat('Y-m', $key)->translatedFormat('M Y'),
+                'rata_nilai' => $nilai->isEmpty() ? null : round($nilai->avg(), 2),
+                'jumlah' => $nilai->count(),
+            ];
+        });
+    }
+
+    /**
+     * Rata-rata tiap aspek untuk radar chart.
+     *
+     * @param  Collection<int, Assesment>  $penilaians
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function rekapAspek(Collection $penilaians): Collection
+    {
+        $aspekTersedia = $penilaians->pluck('aspect')->filter();
+
+        return collect(PenilaiSkor::aspekKeys())->map(function (string $aspek) use ($aspekTersedia): array {
+            $jumlah = $aspekTersedia
+                ->map(fn ($a): int => PenilaiSkor::poinAspek($aspek, $a->{$aspek}))
+                ->filter(fn (int $poin): bool => $poin > 0);
+
+            return [
+                'label' => PenilaiSkor::LABEL_ASPEK[$aspek],
+                'rata' => $jumlah->isEmpty() ? 0.0 : round($jumlah->avg() / max(PenilaiSkor::RUBRIK[$aspek]) * 100, 2),
+            ];
+        });
     }
 }

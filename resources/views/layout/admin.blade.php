@@ -24,8 +24,14 @@
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- jQuery + DataTables CDN (tabel interaktif) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        [x-cloak] { display: none !important; }
     </style>
     @stack('styles')
 </head>
@@ -64,6 +70,18 @@
                         <span>Seksi Bidang</span>
                     </a>
 
+                    <a href="{{ route('admin.rekap') }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('admin.rekap') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-chart-column w-5 text-center text-sm {{ request()->routeIs('admin.rekap') ? 'text-white' : 'text-slate-400' }}"></i>
+                        <span>Rekap Visual</span>
+                    </a>
+
+                    <a href="{{ route('admin.kegiatan') }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('admin.kegiatan.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-calendar-days w-5 text-center text-sm {{ request()->routeIs('admin.kegiatan.*') ? 'text-white' : 'text-slate-400' }}"></i>
+                        <span>Kegiatan OSIS / MPR</span>
+                    </a>
+
                     <a href="{{ route('admin.penilaian') }}" 
                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('admin.penilaian') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-award w-5 text-center text-sm {{ request()->routeIs('admin.penilaian') ? 'text-white' : 'text-slate-400' }}"></i>
@@ -95,7 +113,9 @@
                     </div>
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-800 truncate">{{ auth()->user()->username ?? 'Administrator' }}</p>
-                        <p class="text-[10px] text-blue-600 font-semibold uppercase">{{ auth()->user()->role ?? 'Admin' }}</p>
+                        <p class="text-[10px] text-blue-600 font-semibold uppercase truncate">
+                            {{ auth()->user()->division->nama_sekbid ?? (auth()->user()->role ?? 'Admin') }}
+                        </p>
                     </div>
                 </div>
 
@@ -184,6 +204,12 @@
                         </a>
                         <a href="{{ route('admin.sekbid') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 hover:bg-blue-50">
                             <i class="fa-solid fa-network-wired w-5 text-blue-600"></i> Seksi Bidang
+                        </a>
+                        <a href="{{ route('admin.rekap') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 hover:bg-blue-50">
+                            <i class="fa-solid fa-chart-column w-5 text-blue-600"></i> Rekap Visual
+                        </a>
+                        <a href="{{ route('admin.kegiatan') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 hover:bg-blue-50">
+                            <i class="fa-solid fa-calendar-days w-5 text-blue-600"></i> Kegiatan OSIS / MPR
                         </a>
                         <a href="{{ route('admin.penilaian') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-700 hover:bg-blue-50">
                             <i class="fa-solid fa-award w-5 text-blue-600"></i> Penilaian Kinerja

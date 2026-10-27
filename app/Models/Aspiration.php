@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'status_aspirasi',
     'id_users',
     'kode_kategori',
+    'tanggapan_mpk',
+    'catatan_internal',
+    'id_users_penangan',
 ])]
 class Aspiration extends Model
 {
@@ -35,6 +38,9 @@ class Aspiration extends Model
         'status_aspirasi',
         'id_users',
         'kode_kategori',
+        'tanggapan_mpk',
+        'catatan_internal',
+        'id_users_penangan',
     ];
 
     public function user(): BelongsTo
@@ -50,5 +56,10 @@ class Aspiration extends Model
     public function kategori(): BelongsTo
     {
         return $this->category();
+    }
+
+    public function penangan(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_users_penangan', 'id_users');
     }
 }

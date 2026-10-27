@@ -61,10 +61,13 @@
                 </div>
             </div>
             <div>
-                <p class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">A <span class="text-sm font-medium text-slate-400">/ 94%</span></p>
-                <p class="text-xs text-emerald-600 font-semibold flex items-center gap-1 mt-1">
-                    <i class="fa-solid fa-star text-[10px]"></i> Predikat Sangat Baik
+                <p class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                    {{ number_format($rataNilai, 2) }}<span class="text-sm font-medium text-slate-400">/100</span>
                 </p>
+                <p class="text-xs font-semibold flex items-center gap-1 mt-1 {{ \App\Services\PenilaiSkor::warnaPredikat($predikat) }} px-2 py-0.5 rounded-full inline-flex w-fit">
+                    <i class="fa-solid fa-star text-[10px]"></i> {{ $predikat }}
+                </p>
+                <p class="text-[11px] text-slate-400 mt-1.5">Dari {{ $totalPenilaian }} data penilaian</p>
             </div>
         </div>
 
@@ -91,11 +94,11 @@
         <div class="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-sm font-bold text-slate-900">Tren Aspirasi & Evaluasi Mingguan</h3>
-                    <p class="text-xs text-slate-400">Grafik pergerakan aspirasi masuk dan evaluasi progja</p>
+                    <h3 class="text-sm font-bold text-slate-900">Tren Penilaian Kinerja</h3>
+                    <p class="text-xs text-slate-400">Rata-rata nilai dan jumlah penilaian 6 bulan terakhir</p>
                 </div>
                 <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-600">
-                    Bulan Berjalan
+                    6 Bulan Terakhir
                 </span>
             </div>
             <div class="h-64 sm:h-72">
@@ -113,41 +116,34 @@
                 </div>
             </div>
 
-            <!-- Progress Bars for 5 Aspek Kinerja -->
+            <!-- Rata-rata aspek dari data penilaian nyata -->
             <div class="space-y-3 pt-3 border-t border-slate-100">
-                <p class="text-xs font-bold text-slate-700">Rata-Rata 5 Aspek Penilaian:</p>
+                <p class="text-xs font-bold text-slate-700">Rata-rata Aspek Penilaian:</p>
 
-                <!-- Aspek 1: GDS -->
-                <div class="space-y-1">
-                    <div class="flex justify-between text-[11px] font-semibold">
-                        <span class="text-slate-600">Keaktifan GDS Pagi</span>
-                        <span class="text-blue-600">96%</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-blue-600 h-1.5 rounded-full" style="width: 96%"></div>
-                    </div>
-                </div>
+                @php $warnaAspek = ['bg-blue-600 text-blue-600', 'bg-emerald-600 text-emerald-600', 'bg-indigo-600 text-indigo-600']; @endphp
 
-                <!-- Aspek 2: Piket RO -->
-                <div class="space-y-1">
-                    <div class="flex justify-between text-[11px] font-semibold">
-                        <span class="text-slate-600">Kedisiplinan Piket RO</span>
-                        <span class="text-emerald-600">92%</span>
+                @foreach($rekapAspek->take(3) as $index => $aspek)
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[11px] font-semibold">
+                            <span class="text-slate-600">{{ $aspek['label'] }}</span>
+                            <span class="{{ $warnaAspek[$index % 3] }}">{{ number_format($aspek['rata'], 1) }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="{{ $warnaAspek[$index % 3] }} h-1.5 rounded-full" style="width: {{ min(100, $aspek['rata']) }}%"></div>
+                        </div>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-emerald-600 h-1.5 rounded-full" style="width: 92%"></div>
-                    </div>
-                </div>
+                @endforeach
 
-                <!-- Aspek 3: Kekompakan -->
-                <div class="space-y-1">
-                    <div class="flex justify-between text-[11px] font-semibold">
-                        <span class="text-slate-600">Kekompakan Tim Sekbid</span>
-                        <span class="text-indigo-600">90%</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-indigo-600 h-1.5 rounded-full" style="width: 90%"></div>
-                    </div>
+                <a href="{{ route('admin.rekap') }}" class="block text-center text-[11px] font-bold text-blue-600 hover:text-blue-700 pt-1">
+                    Lihat Rekap Visual Lengkap <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                </a>
+            </div>
+
+            <!-- Distribusi Predikat -->
+            <div class="space-y-3 pt-3 border-t border-slate-100">
+                <p class="text-xs font-bold text-slate-700">Distribusi Predikat Kinerja</p>
+                <div class="h-44 relative flex items-center justify-center">
+                    <canvas id="donutChartPredikat"></canvas>
                 </div>
             </div>
         </div>
@@ -174,6 +170,7 @@
                         <th class="py-3.5 px-6">Keaktifan GDS</th>
                         <th class="py-3.5 px-6">Piket RO</th>
                         <th class="py-3.5 px-6">Kekompakan</th>
+                        <th class="py-3.5 px-6">Nilai</th>
                         <th class="py-3.5 px-6">Tanggal</th>
                         <th class="py-3.5 px-6 text-right">Penilai</th>
                     </tr>
@@ -184,30 +181,29 @@
                             <td class="py-4 px-6 font-bold text-slate-800">
                                 <div class="flex items-center gap-2.5">
                                     <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
-                                        {{ strtoupper(substr($penilaian->anggotaSekbid->nama_anggota ?? 'A', 0, 1)) }}
+                                        {{ strtoupper(substr($penilaian->divisionMember?->nama_anggota ?? 'A', 0, 1)) }}
                                     </div>
-                                    <span>{{ $penilaian->anggotaSekbid->nama_anggota ?? 'Anggota Sekbid' }}</span>
+                                    <span>{{ $penilaian->divisionMember?->nama_anggota ?? 'Anggota Sekbid' }}</span>
                                 </div>
                             </td>
                             <td class="py-4 px-6 text-slate-600">
                                 <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium">
-                                    {{ $penilaian->anggotaSekbid->division->nama_sekbid ?? 'Sekbid OSIS' }}
+                                    {{ $penilaian->divisionMember?->division?->nama_sekbid ?? 'Sekbid OSIS' }}
                                 </span>
                             </td>
                             <td class="py-4 px-6">
-                                <span class="font-bold text-emerald-600">{{ $penilaian->aspect->keaktifan_gds ?? 'Baik' }}</span>
+                                <span class="font-bold text-emerald-600">{{ $penilaian->aspect?->keaktifan_gds ?? '-' }}</span>
                             </td>
-                            <td class="py-4 px-6 text-slate-700">
-                                {{ $penilaian->aspect->piket_ro ?? 'Baik' }}
-                            </td>
-                            <td class="py-4 px-6 text-slate-700">
-                                {{ $penilaian->aspect->kekompakan ?? 'Sangat Baik' }}
+                            <td class="py-4 px-6 text-slate-700">{{ $penilaian->aspect?->piket_ro ?? '-' }}</td>
+                            <td class="py-4 px-6 text-slate-700">{{ $penilaian->aspect?->kekompakan ?? '-' }}</td>
+                            <td class="py-4 px-6 font-black text-slate-900">
+                                {{ $penilaian->aspect?->nilai !== null ? number_format($penilaian->aspect->nilai, 2) : '-' }}
                             </td>
                             <td class="py-4 px-6 text-slate-500">
-                                {{ $penilaian->aspect ? \Carbon\Carbon::parse($penilaian->aspect->tanggal_penilaian)->translatedFormat('d M Y') : '-' }}
+                                {{ $penilaian->aspect?->tanggal_penilaian?->translatedFormat('d M Y') ?? '-' }}
                             </td>
                             <td class="py-4 px-6 text-right font-medium text-slate-600">
-                                {{ $penilaian->user->username ?? 'MPK' }}
+                                {{ $penilaian->user?->username ?? 'MPK' }}
                             </td>
                         </tr>
                     @empty
@@ -227,30 +223,36 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Line/Area Chart Aktivitas
+        // Tren nyata: rata-rata nilai & jumlah penilaian per bulan (6 bulan terakhir)
+        const trenLabels = {!! json_encode($trenBulanan->pluck('periode')->values()) !!};
+        const trenRata = {!! json_encode($trenBulanan->pluck('rata_nilai')->map(fn($n) => $n ?? 0)->values()) !!};
+        const trenJumlah = {!! json_encode($trenBulanan->pluck('jumlah')->values()) !!};
+
         const ctxLine = document.getElementById('lineChartAktivitas').getContext('2d');
         new Chart(ctxLine, {
             type: 'line',
             data: {
-                labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4', 'Minggu 5'],
+                labels: trenLabels,
                 datasets: [
                     {
-                        label: 'Aspirasi Masuk',
-                        data: [12, 19, 15, 25, 22],
+                        label: 'Rata-rata Nilai',
+                        data: trenRata,
                         borderColor: '#2563eb',
                         backgroundColor: 'rgba(37, 99, 235, 0.1)',
                         fill: true,
                         tension: 0.4,
-                        borderWidth: 2
+                        borderWidth: 2,
+                        yAxisID: 'y'
                     },
                     {
-                        label: 'Evaluasi Progja',
-                        data: [8, 14, 18, 16, 20],
+                        label: 'Jumlah Penilaian',
+                        data: trenJumlah,
                         borderColor: '#059669',
                         backgroundColor: 'rgba(5, 150, 105, 0.05)',
                         fill: true,
                         tension: 0.4,
-                        borderWidth: 2
+                        borderWidth: 2,
+                        yAxisID: 'y1'
                     }
                 ]
             },
@@ -261,21 +263,47 @@
                     legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    y: { beginAtZero: true, max: 100, grid: { color: '#f1f5f9' }, title: { display: true, text: 'Nilai', font: { size: 10 } } },
+                    y1: { position: 'right', beginAtZero: true, grid: { display: false }, title: { display: true, text: 'Jumlah', font: { size: 10 } } },
                     x: { grid: { display: false } }
                 }
             }
         });
 
-        // Donut Chart Status Aspirasi
+        // Donut Chart Status Aspirasi (angka asli, tanpa data palsu)
         const ctxDonut = document.getElementById('donutChartAspirasi').getContext('2d');
         new Chart(ctxDonut, {
             type: 'doughnut',
             data: {
                 labels: ['Menunggu', 'Diproses', 'Selesai'],
                 datasets: [{
-                    data: [{{ $aspirasiMenunggu ?: 3 }}, {{ $aspirasiProses ?: 5 }}, {{ $aspirasiSelesai ?: 12 }}],
+                    data: [{{ $aspirasiMenunggu }}, {{ $aspirasiProses }}, {{ $aspirasiSelesai }}].map((v) => Number(v) || 0),
                     backgroundColor: ['#f59e0b', '#2563eb', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // Donut Chart Distribusi Predikat
+        const distLabels = {!! json_encode($distribusiPredikat->map(fn($d) => $d['label'])->values()) !!};
+        const distData = {!! json_encode($distribusiPredikat->map(fn($d) => $d['jumlah'])->values()) !!};
+        const warnaPredikat = { 'Sangat Baik': '#10b981', 'Baik': '#2563eb', 'Cukup': '#f59e0b', 'Perlu Pembinaan': '#c2410c', 'Tidak Memadai': '#dc2626' };
+        const ctxPredikat = document.getElementById('donutChartPredikat').getContext('2d');
+        new Chart(ctxPredikat, {
+            type: 'doughnut',
+            data: {
+                labels: distLabels,
+                datasets: [{
+                    data: distData.map((v) => Number(v) || 0),
+                    backgroundColor: distLabels.map((l) => warnaPredikat[l] ?? '#94a3b8'),
                     borderWidth: 0
                 }]
             },

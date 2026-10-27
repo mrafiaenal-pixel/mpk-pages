@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\DivisionMember;
-use App\Models\AssesmentAspect;
 use App\Models\Aspiration;
-use App\Models\KategoriAspirasi;
 use App\Models\Assesment;
-use App\Models\SchoolProfile;
-use App\Models\ProfilKepengurusan;
-use App\Models\WorkProgram;
+use App\Models\AssesmentAspect;
 use App\Models\Division;
+use App\Models\DivisionMember;
+use App\Models\KategoriAspirasi;
+use App\Models\ProfilKepengurusan;
+use App\Models\SchoolProfile;
 use App\Models\User;
 use App\Models\VissionMission;
+use App\Models\WorkProgram;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $ketuaMpk = User::firstOrCreate(
-            ['username' => 'ketua_mpk'],
+            ['username' => 'admin'],
             [
                 'email' => 'ketua.mpk@smkwikrama.sch.id',
                 'password' => Hash::make('password'),
@@ -78,6 +78,22 @@ class DatabaseSeeder extends Seeder
                     'nama_anggota' => $namaAnggota,
                 ]);
             }
+        }
+
+        // 3b. MPK yang ditugaskan menangani satu seksi bidang saja.
+        $rafi = User::firstOrCreate(
+            ['username' => 'rafi'],
+            [
+                'email' => 'rafi@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'mpk',
+            ]
+        );
+
+        $sekbidDelapan = Division::where('nama_sekbid', 'like', 'Sekbid 8%')->first();
+
+        if ($sekbidDelapan !== null && $rafi->id_sekbid === null) {
+            $rafi->forceFill(['id_sekbid' => $sekbidDelapan->id])->save();
         }
 
         // 4. Program Kerja
@@ -137,7 +153,14 @@ class DatabaseSeeder extends Seeder
                 'id_users' => $ketuaMpk->id_users,
                 'id_aspek_penilaian' => $aspek->id,
             ]);
+
+            $aspek->refreshSkor();
         }
+
+        // 5b. Backfill skor untuk data penilaian lama yang belum punya nilai numerik.
+        AssesmentAspect::whereNull('nilai')->each(
+            fn (AssesmentAspect $aspekLama) => $aspekLama->refreshSkor()
+        );
 
         // 6. Sample Aspirasi
         $sampleAspirasi = [

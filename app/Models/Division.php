@@ -32,4 +32,12 @@ class Division extends Model
     {
         return $this->members();
     }
+
+    /**
+     * MPK yang ditugaskan menangani sekbid ini.
+     */
+    public function assessors(): HasMany
+    {
+        return $this->hasMany(User::class, 'id_sekbid', 'id');
+    }
 }
