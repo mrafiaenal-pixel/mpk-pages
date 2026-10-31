@@ -29,16 +29,62 @@ class DatabaseSeeder extends Seeder
             [
                 'email' => 'muhamadrafiaenalyakin@smkwikrama.sch.id',
                 'password' => Hash::make('password'),
-                'role' => 'mpk',
+                'role' => 'admin',
             ]
         );
 
         $ketuaMpk = User::firstOrCreate(
-            ['username' => 'admin'],
+            ['username' => 'rafi'],
             [
-                'email' => 'ketua.mpk@smkwikrama.sch.id',
+                'email' => 'rafi@smkwikrama.sch.id',
                 'password' => Hash::make('password'),
                 'role' => 'mpk',
+            ]
+        );
+
+        // Add new roles: ketua, komc, anggota, bendahara, guru
+        User::firstOrCreate(
+            ['username' => 'ketua'],
+            [
+                'email' => 'ketua@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'ketua',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['username' => 'komc'],
+            [
+                'email' => 'komc@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komc',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['username' => 'anggota'],
+            [
+                'email' => 'anggota@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'anggota',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['username' => 'bendahara'],
+            [
+                'email' => 'bendahara@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'bendahara',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['username' => 'guru'],
+            [
+                'email' => 'guru@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'guru',
             ]
         );
 

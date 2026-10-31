@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
@@ -54,7 +53,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'username' => 'required|string|min:3|max:50|unique:users,username',
             'email' => 'required|string|email|max:100|unique:users,email',
-            'role' => 'required|in:admin,mpk,osis,siswa',
+            'role' => 'required|in:admin,mpk,guru,ketua,komc,anggota,bendahara',
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'terms' => 'accepted',
         ], [
@@ -83,6 +82,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login')
             ->with('success', 'Anda telah berhasil keluar.');
     }

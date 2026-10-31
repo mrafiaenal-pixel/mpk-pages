@@ -23,6 +23,20 @@ class PenilaianController extends Controller
     {
         $user = $request->user();
 
+        // Cek role user - aturan akses:
+        // - ketua, komc, guru: bisa melihat daftar penilaian lengkap
+        // - bendahara: bisa melihat tapi hanya untuk input referensi, tidak bisa edit
+        // - anggota: hanya bisa input, tidak bisa melihat daftar penilaian
+        // - admin/mpk: bisa semua
+        if ($user->isBendahara()) {
+            // Bendahara bisa melihat daftar tapi dengan batasan
+            // (boleh lihat tapi fitur edit dihapus)
+        } elseif ($user->isAnggota()) {
+            // Anggota hanya bisa input, tidak boleh melihat daftar penilaian
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'Anda hanya boleh menginput penilaian, tidak boleh melihat daftar.');
+        }
+
         $penilaians = $this->filter->build($request, $user)
             ->paginate(10)
             ->withQueryString();
@@ -35,6 +49,8 @@ class PenilaianController extends Controller
             'anggotaList' => $this->filter->anggotaTersedia($user, $divisiId),
             'penilaiList' => $this->filter->parameterAktif($request),
             'statistik' => $this->ringkasan($this->filter->build($request, $user)),
+            'userRole' => $user->role,
+            'showEditButtons' => $user->canEditPenilaian() || $user->isAdminOrMpk(),
         ]);
     }
 
@@ -67,6 +83,11 @@ class PenilaianController extends Controller
      */
     public function destroy(Request $request, Assesment $penilaian)
     {
+        // Hanya komc, ketua, dan admin/mpk yang bisa menghapus penilaian
+        if (! $request->user()->canEditPenilaian()) {
+            abort_unless(false, 403);
+        }
+
         abort_unless($request->user()->canAccessDivision($penilaian->divisionMember?->id_sekbid), 403);
 
         $penilaian->aspect?->delete();
@@ -81,6 +102,12 @@ class PenilaianController extends Controller
      */
     public function export(Request $request): StreamedResponse
     {
+        // Hanya komc, ketua, guru, dan admin/mpk yang bisa export
+        if (! $request->user()->canEditPenilaian() && ! $request->user()->isAdminOrMpk()) {
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'Anda tidak memiliki akses untuk ekspor data.');
+        }
+
         $rows = $this->filter->build($request, $request->user())
             ->orderBy('id')
             ->get();
@@ -134,6 +161,12 @@ class PenilaianController extends Controller
      */
     public function exportPdf(Request $request)
     {
+        // Hanya komc, ketua, guru, dan admin/mpk yang bisa export PDF
+        if (! $request->user()->canEditPenilaian() && ! $request->user()->isAdminOrMpk()) {
+            return redirect()->route('admin.dashboard')
+                ->with('error', 'Anda tidak memiliki akses untuk ekspor PDF.');
+        }
+
         $rows = $this->filter->build($request, $request->user())
             ->with(['aspect', 'divisionMember.division', 'user'])
             ->orderBy('id')
@@ -171,5 +204,154 @@ class PenilaianController extends Controller
             'tertinggi' => $nilai->isEmpty() ? 0.0 : round($nilai->max(), 2),
             'terendah' => $nilai->isEmpty() ? 0.0 : round($nilai->min(), 2),
         ];
+    }
+
+    /**
+     * API: Dapatkan data GDS vs Piket RO per divisi untuk chart.
+     * Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses.
+     */
+    public function getGdsPiketData(Request $request)
+    {
+        $user = $request->user();
+
+        // Hanya komc, ketua, guru, dan admin/mpk yang bisa melihat chart
+        if (! $user->canViewChart() && ! $user->isAdminOrMpk()) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        $divisi = $request->query('divisi');
+        $type = $request->query('type', 'bar');
+
+        $query = Assesment::query()
+            ->with(['divisionMember.division', 'aspect']);
+
+        if ($divisi) {
+            $query->whereHas(
+                'divisionMember',
+                fn (Builder $member) => $member->where('id_sekbid', $divisi)
+            );
+        }
+
+        $data = $query->get()
+            ->groupBy(
+                fn ($item) => $item->divisionMember?->division?->nama_sekbid ?? 'Tanpa Divisi'
+            );
+
+        $labels = [];
+        $gdsData = [];
+        $piketData = [];
+
+        foreach ($data as $divisiName => $items) {
+            $labels[] = $divisiName;
+            $gdsAvg = $items->avg(fn ($item) => $item->aspect->pluck('keaktifan_gds')?->first() ?? 0);
+            $piketAvg = $items->avg(fn ($item) => $item->aspect->pluck('piket_ro')?->first() ?? 0);
+            $gdsData[] = round($gdsAvg, 2);
+            $piketData[] = round($piketAvg, 2);
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'gdsData' => $gdsData,
+            'piketData' => $piketData,
+        ]);
+    }
+
+    /**
+     * API: Dapatkan data distribusi poin per aspek penilaian.
+     * Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses.
+     */
+    public function getAspekData(Request $request)
+    {
+        $user = $request->user();
+
+        // Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses chart
+        if (! $user->canViewChart() && ! $user->isAdminOrMpk()) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        $divisi = $request->query('divisi');
+
+        $query = Assesment::query()
+            ->with(['aspect', 'divisionMember.division']);
+
+        if ($divisi) {
+            $query->whereHas(
+                'divisionMember',
+                fn (Builder $member) => $member->where('id_sekbid', $divisi)
+            );
+        }
+
+        $data = $query->get()
+            ->groupBy(
+                fn ($item) => $item->aspect?->id_aspek_penilaian !== null
+                    ? 'Aspek '.$item->aspect->id
+                    : 'Tanpa Aspek'
+            );
+
+        $labels = [];
+        $totalPoinData = [];
+
+        foreach ($data as $aspekName => $items) {
+            $labels[] = $aspekName;
+            $totalPoinData[] = $items->sum(fn ($item) => $item->aspect->pluck('total_poin')?->first() ?? 0);
+        }
+
+        return response()->json([
+            'aspekLabels' => $labels,
+            'totalPoinData' => $totalPoinData,
+        ]);
+    }
+
+    /**
+     * API: Dapatkan statistik per divisi.
+     * Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses.
+     */
+    public function getDivisiStats(Request $request)
+    {
+        $user = $request->user();
+
+        // Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses
+        if (! $user->canViewChart() && ! $user->isAdminOrMpk()) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        $divisi = $request->query('divisi');
+
+        $query = Assesment::query()
+            ->with(['aspect', 'divisionMember.division']);
+
+        if ($divisi) {
+            $query->whereHas(
+                'divisionMember',
+                fn (Builder $member) => $member->where('id_sekbid', $divisi)
+            );
+        }
+
+        $divisions = $query->get()
+            ->groupBy(
+                fn ($item) => $item->divisionMember?->division?->nama_sekbid ?? 'Tanpa Divisi'
+            );
+
+        $labels = [];
+        $jumlahData = [];
+        $rataData = [];
+        $tertinggiData = [];
+        $terendahData = [];
+
+        foreach ($divisions as $divName => $items) {
+            $labels[] = $divName;
+            $jumlahData[] = $items->count();
+            $rataData[] = round($items->avg(fn ($i) => $i->aspect->pluck('nilai')?->first() ?? 0), 2);
+            $tertinggiData[] = round($items->max(fn ($i) => $i->aspect->pluck('nilai')?->first() ?? 0), 2);
+            $terendahData[] = round($items->min(fn ($i) => $i->aspect->pluck('nilai')?->first() ?? 0), 2);
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'jumlah' => $jumlahData,
+            'rata_nilai' => $rataData,
+            'tertinggi' => $tertinggiData,
+            'terendah' => $terendahData,
+        ]);
     }
 }
