@@ -3,24 +3,33 @@
 @section('title', 'Penilaian Kinerja Sekbid')
 
 @section('content')
+@php
+    $divisionNames = auth()->user()->sekbids->pluck('nama_sekbid');
+
+    if (auth()->user()->division !== null) {
+        $divisionNames->prepend(auth()->user()->division->nama_sekbid);
+    }
+@endphp
 <div class="space-y-6" x-data="{ modalOpen: false }">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">Penilaian Kinerja Anggota Sekbid</h1>
             <p class="text-xs text-slate-500 mt-1">
                 @if(auth()->user()->isDivisionScoped())
-                    Anda hanya menangani <span class="font-bold text-blue-600">{{ auth()->user()->division->nama_sekbid ?? 'divisi Anda' }}</span>.
+                    Anda menangani <span class="font-bold text-blue-600">{{ $divisionNames->join(', ') }}</span>.
                 @else
                     Evaluasi kedisiplinan dan capaian kegiatan OSIS berdasarkan 6 aspek standar.
                 @endif
             </p>
         </div>
         <div class="flex items-center gap-2">
+            @if(auth()->user()->canViewPenilaianDaftar())
             <a href="{{ route('admin.penilaian.export', request()->query()) }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-xs transition-all">
                 <i class="fa-solid fa-file-excel text-emerald-600"></i>
                 <span>Export Excel</span>
             </a>
+            @endif
             <button @click="modalOpen = true"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all cursor-pointer">
                 <i class="fa-solid fa-plus text-xs"></i>
@@ -29,6 +38,7 @@
         </div>
     </div>
 
+    @if(auth()->user()->canViewPenilaianDaftar())
     <!-- Statistik Singkat -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5">
@@ -54,7 +64,7 @@
           class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
         <div class="lg:col-span-2">
             <label class="block text-[11px] font-bold text-slate-500 mb-1">Cari</label>
-            <input type="text" name="q" value="{{ $penilaiList['q'] ?? '' }}" placeholder="Nama anggota atau MPK penilai..."
+            <input type="text" name="q" value="{{ $penilaiList['q'] ?? '' }}" placeholder="Nama anggota atau {{ $site->singkatan }} penilai..."
                    class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs outline-hidden focus:border-blue-500 focus:bg-white">
         </div>
 
@@ -175,7 +185,7 @@
                                 {{ $aspek?->tanggal_penilaian?->translatedFormat('d M Y') ?? '-' }}
                             </td>
                             <td class="py-4 px-6 text-right text-slate-600 font-medium">
-                                {{ $item->user?->username ?? 'MPK' }}
+                                {{ $item->user?->username ?? $site->singkatan }}
                             </td>
                             <td class="py-4 px-6 text-right">
                                 <form action="{{ route('admin.penilaian.destroy', $item->id) }}" method="POST"
@@ -213,6 +223,7 @@
             </div>
         @endif
     </div>
+    @endif
 
     <!-- MODAL FORM INPUT PENILAIAN -->
     <div x-show="modalOpen"
@@ -261,7 +272,7 @@
                         </select>
                         @if($anggotaList->isEmpty())
                             <p class="text-[11px] text-amber-600 font-semibold">
-                                Tidak ada anggota sekbid yang dapat Anda nilai. Hubungi ketua MPK.
+                                Tidak ada anggota sekbid yang dapat Anda nilai. Hubungi ketua {{ $site->singkatan }}.
                             </p>
                         @endif
                     </div>

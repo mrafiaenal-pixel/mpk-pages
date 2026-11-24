@@ -25,7 +25,7 @@
 </head>
 <body>
     <h1>Laporan Penilaian Kinerja Anggota Sekbid</h1>
-    <p class="subtitle">MPK Portal &middot; Dibuat pada {{ $generatedAt }}</p>
+    <p class="subtitle">{{ $site->singkatan }} Portal &middot; Dibuat pada {{ $generatedAt }}</p>
 
     <div class="meta">
         <span><strong>Jumlah Data:</strong> {{ $penilaians->count() }}</span>
@@ -41,7 +41,7 @@
                 <th style="width:14%">Tanggal</th>
                 <th style="width:16%">Seksi Bidang</th>
                 <th style="width:14%">Anggota</th>
-                <th style="width:14%">MPK Penilai</th>
+                <th style="width:14%">{{ $site->singkatan }} Penilai</th>
                 <th style="width:8%">Nilai</th>
                 <th style="width:12%">Predikat</th>
                 <th style="width:18%">Catatan</th>

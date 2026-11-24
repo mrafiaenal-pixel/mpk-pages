@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\SiteSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly SiteSettings $site) {}
+
     public function showLogin()
     {
         if (Auth::check()) {
@@ -31,7 +34,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             return redirect()->intended(route('admin.dashboard'))
-                ->with('success', 'Selamat datang kembali di Portal MPK!');
+                ->with('success', 'Selamat datang kembali di Portal '.$this->site->singkatan.'!');
         }
 
         return back()->withErrors([
@@ -53,7 +56,6 @@ class AuthController extends Controller
         $validated = $request->validate([
             'username' => 'required|string|min:3|max:50|unique:users,username',
             'email' => 'required|string|email|max:100|unique:users,email',
-            'role' => 'required|in:admin,mpk,guru,ketua,komc,anggota,bendahara',
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'terms' => 'accepted',
         ], [
@@ -66,7 +68,7 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $validated['username'],
             'email' => $validated['email'],
-            'role' => 'siswa',
+            'role' => 'anggota',
             'password' => Hash::make($validated['password']),
         ]);
 
@@ -74,7 +76,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('admin.dashboard')
-            ->with('success', 'Akun berhasil dibuat. Selamat datang di Portal MPR!');
+            ->with('success', 'Akun berhasil dibuat. Selamat datang di Portal '.$this->site->singkatan.'!');
     }
 
     public function logout(Request $request)

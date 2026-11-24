@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Daftar Akun - MPK Portal</title>
+    <title>Daftar Akun - {{ $site->singkatan }} Portal</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,14 +32,14 @@
                 <!-- Brand Logo & Back to Home -->
                 <div class="flex items-center justify-between">
                     <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
                             <i class="fa-solid fa-graduation-cap text-xl"></i>
                         </div>
                         <div>
                             <span class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
-                                MPK <span class="text-blue-600 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200/60 uppercase tracking-wider">Portal</span>
+                                {{ $site->singkatan }} <span class="text-blue-600 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200/60 uppercase tracking-wider">Portal</span>
                             </span>
-                            <p class="text-xs text-slate-400 font-medium tracking-wide">Majelis Perwakilan Kelas</p>
+                            <p class="text-xs text-slate-400 font-medium tracking-wide">{{ $site->namaLengkap }}</p>
                         </div>
                     </a>
 
@@ -52,18 +52,18 @@
                 <div class="space-y-1.5">
                     <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Buat Akun Baru</h1>
                     <p class="text-sm text-slate-500 leading-relaxed">
-                        Lengkapi formulir di bawah ini untuk mendaftar akun portal MPK.
+                        Lengkapi formulir di bawah ini untuk mendaftar akun portal {{ $site->singkatan }}.
                     </p>
                 </div>
 
                 <!-- Error Alerts -->
                 @if($errors->any())
-                    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold space-y-1">
+                    <div class="p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold space-y-1">
                         <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-circle-exclamation text-rose-500 text-sm"></i>
+                            <i class="fa-solid fa-circle-exclamation text-blue-500 text-sm"></i>
                             <span>Terdapat Kesalahan:</span>
                         </div>
-                        <ul class="list-disc pl-5 font-normal text-rose-700">
+                        <ul class="list-disc pl-5 font-normal text-blue-700">
                             @foreach($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -78,7 +78,7 @@
                     <!-- Username -->
                     <div class="space-y-1">
                         <label for="username" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                            Username <span class="text-rose-500">*</span>
+                            Username <span class="text-blue-500">*</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -94,7 +94,7 @@
                     <!-- Email -->
                     <div class="space-y-1">
                         <label for="email" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                            Alamat Email <span class="text-rose-500">*</span>
+                            Alamat Email <span class="text-blue-500">*</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -112,7 +112,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="space-y-1">
                             <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                                Kata Sandi <span class="text-rose-500">*</span>
+                                Kata Sandi <span class="text-blue-500">*</span>
                             </label>
                             <input :type="showPassword ? 'text' : 'password'" id="password" name="password" required
                                    placeholder="Min. 6 karakter"
@@ -121,7 +121,7 @@
 
                         <div class="space-y-1">
                             <label for="password_confirmation" class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                                Konfirmasi Sandi <span class="text-rose-500">*</span>
+                                Konfirmasi Sandi <span class="text-blue-500">*</span>
                             </label>
                             <input :type="showPassword ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" required
                                    placeholder="Ulangi sandi"
@@ -143,7 +143,7 @@
                             <input type="checkbox" name="terms" value="1" required
                                    class="w-4 h-4 mt-0.5 text-blue-600 rounded-sm border-slate-300 focus:ring-blue-500">
                             <span class="text-xs text-slate-600 leading-tight">
-                                Saya menyetujui <a href="#" class="text-blue-600 font-semibold underline">Syarat & Ketentuan</a> serta Kebijakan Privasi sistem MPK.
+                                Saya menyetujui <a href="#" class="text-blue-600 font-semibold underline">Syarat & Ketentuan</a> serta Kebijakan Privasi sistem {{ $site->singkatan }}.
                             </span>
                         </label>
                     </div>
@@ -167,16 +167,16 @@
         </div>
 
         <!-- RIGHT: Decorative Brand Panel -->
-        <div class="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-12 text-white relative overflow-hidden flex-col justify-between">
+        <div class="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 p-12 text-white relative overflow-hidden flex-col justify-between">
             <div class="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
-            <div class="absolute bottom-10 -left-10 w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none"></div>
+            <div class="absolute bottom-10 -left-10 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
 
             <div class="relative z-10 flex items-center justify-between">
                 <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold text-blue-100 border border-white/20">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="w-2 h-2 rounded-full bg-blue-400"></span>
                     Registrasi Terbuka
                 </span>
-                <span class="text-xs text-blue-200 font-medium">MPK Official</span>
+                <span class="text-xs text-blue-200 font-medium">{{ $site->singkatan }} Official</span>
             </div>
 
             <div class="relative z-10 my-auto py-12 text-center space-y-6">

@@ -30,7 +30,7 @@ class PenilaianFilter
             ->visibleTo($user)
             ->latest('id');
 
-        // Filter divisi. MPK yang terikat divisi hanya boleh filter divisinya sendiri.
+        // Filter divisi. Penilai yang terikat divisi hanya boleh filter divisinya sendiri.
         if ($request->filled('divisi')) {
             $divisiId = (int) $request->input('divisi');
 
@@ -47,7 +47,7 @@ class PenilaianFilter
             $query->where('id_anggota_sekbid', (int) $request->input('anggota'));
         }
 
-        // Filter MPK penilai.
+        // Filter penilai.
         if ($request->filled('penilai')) {
             $query->where('id_users', (int) $request->input('penilai'));
         }
@@ -60,7 +60,7 @@ class PenilaianFilter
             });
         });
 
-        // Pencarian bebas pada nama anggota atau MPK penilai.
+        // Pencarian bebas pada nama anggota atau penilai.
         if ($search = trim((string) $request->input('q'))) {
             $query->where(function (Builder $q) use ($search): void {
                 $q->whereHas('divisionMember', fn (Builder $m) => $m->where('nama_anggota', 'like', "%{$search}%"))
@@ -79,7 +79,7 @@ class PenilaianFilter
     public function divisiTersedia(?User $user)
     {
         return Division::query()
-            ->when($user?->isDivisionScoped(), fn (Builder $q) => $q->whereKey($user->accessibleDivisionId()))
+            ->when($user?->isDivisionScoped(), fn (Builder $q) => $q->whereKey($user->accessibleDivisionIds()))
             ->orderBy('nama_sekbid')
             ->get();
     }

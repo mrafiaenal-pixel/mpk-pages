@@ -139,7 +139,7 @@
                                 @if(filled($item->tanggapan_mpk))
                                     <p class="text-slate-700 line-clamp-2">{{ $item->tanggapan_mpk }}</p>
                                     <p class="text-[10px] text-slate-400 mt-0.5">
-                                        oleh {{ $item->penangan?->username ?? 'MPK' }} · {{ $item->updated_at?->translatedFormat('d M Y') }}
+                                        oleh {{ $item->penangan?->username ?? $site->singkatan }} · {{ $item->updated_at?->translatedFormat('d M Y') }}
                                     </p>
                                 @else
                                     <span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600">
@@ -195,7 +195,7 @@
                                         </div>
 
                                         <div class="space-y-1">
-                                            <label class="block text-[11px] font-bold text-slate-700">Tanggapan MPK <span class="text-slate-400 font-normal">(diteruskan ke pengirim)</span></label>
+                                            <label class="block text-[11px] font-bold text-slate-700">Tanggapan {{ $site->singkatan }} <span class="text-slate-400 font-normal">(diteruskan ke pengirim)</span></label>
                                             <textarea name="tanggapan_mpk" rows="4"
                                                       placeholder="Contoh: Aspirasi sudah kami tindak lanjuti dengan jadwal Maintenance minggu depan..."
                                                       class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs outline-hidden resize-none">{{ $item->tanggapan_mpk }}</textarea>
@@ -204,7 +204,7 @@
                                         <div class="space-y-1">
                                             <label class="block text-[11px] font-bold text-slate-700">Catatan Internal <span class="text-slate-400 font-normal">(tidak tampil ke siswa)</span></label>
                                             <textarea name="catatan_internal" rows="2"
-                                                      placeholder="Catatan internal untuk anggota MPK..."
+                                                      placeholder="Catatan internal untuk anggota {{ $site->singkatan }}..."
                                                       class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs outline-hidden resize-none">{{ $item->catatan_internal }}</textarea>
                                         </div>
 

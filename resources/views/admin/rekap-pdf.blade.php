@@ -25,7 +25,7 @@
 </head>
 <body>
     <h1>Laporan Rekap Visual Penilaian OSIS</h1>
-    <p class="subtitle">MPK Portal &middot; Rata-rata nilai per Seksi Bidang &middot; Dibuat pada {{ $generatedAt }}</p>
+    <p class="subtitle">{{ $site->singkatan }} Portal &middot; Rata-rata nilai per Seksi Bidang &middot; Dibuat pada {{ $generatedAt }}</p>
 
     <div class="meta">
         <span><strong>Total Penilaian:</strong> {{ $statistikSekbid->sum('jumlah_penilaian') }}</span>

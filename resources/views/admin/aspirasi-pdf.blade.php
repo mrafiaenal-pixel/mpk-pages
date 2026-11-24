@@ -24,7 +24,7 @@
 </head>
 <body>
     <h1>Laporan Aspirasi Masuk OSIS</h1>
-    <p class="subtitle">MPK Portal &middot; Dibuat pada {{ $generatedAt }}</p>
+    <p class="subtitle">{{ $site->singkatan }} Portal &middot; Dibuat pada {{ $generatedAt }}</p>
 
     <div class="meta">
         <span><strong>Total Data:</strong> {{ $aspirasis->count() }}</span>
@@ -42,7 +42,7 @@
                 <th style="width:26%">Judul Aspirasi</th>
                 <th style="width:14%">Kategori</th>
                 <th style="width:12%">Status</th>
-                <th style="width:15%">Tanggapan MPK</th>
+                <th style="width:15%">Tanggapan {{ $site->singkatan }}</th>
             </tr>
         </thead>
         <tbody>

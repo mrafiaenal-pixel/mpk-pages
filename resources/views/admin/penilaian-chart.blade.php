@@ -56,7 +56,7 @@
                     @endforeach
                 </select>
 
-                <label for="penilaiFilter">Filter MPK Penilai:</label>
+                <label for="penilaiFilter">Filter {{ $site->singkatan }} Penilai:</label>
                 <select id="penilaiFilter" class="form-select form-select-sm">
                     <option value="">Semua Penilai</option>
                     @foreach ($penilaiList as $penilai)

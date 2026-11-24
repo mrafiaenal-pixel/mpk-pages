@@ -1,6 +1,6 @@
 @extends('layout.admin')
 
-@section('title', 'Kelola Kegiatan OSIS / MPK')
+@section('title', 'Kelola Kegiatan OSIS / '.$site->singkatan)
 
 @section('content')
     <div class="space-y-6" x-data="kegiatanPage()">
@@ -8,8 +8,8 @@
         <!-- Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Kelola Kegiatan OSIS / MPK</h1>
-                <p class="text-xs text-slate-500 mt-1">Data program kerja dan kegiatan rutin OSIS serta MPK.</p>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Kelola Kegiatan OSIS / {{ $site->singkatan }}</h1>
+                <p class="text-xs text-slate-500 mt-1">Data program kerja dan kegiatan rutin OSIS serta {{ $site->singkatan }}.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ route('admin.kegiatan.export.csv', request()->query()) }}"
@@ -154,7 +154,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="py-8 text-center text-slate-400">Belum ada data kegiatan OSIS /
-                                    MPK.</td>
+                                    {{ $site->singkatan }}.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -182,7 +182,7 @@
                                 x-text="editing ? 'Ubah Kegiatan' : 'Tambah Kegiatan'">
                                 Tambah Kegiatan
                             </h3>
-                            <p class="text-[11px] text-slate-400 mt-1">Isi data kegiatan OSIS / MPK.</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Isi data kegiatan OSIS / {{ $site->singkatan }}.</p>
                         </div>
                         <button type="button" @click="closeModal()"
                             class="p-2 text-slate-400 hover:text-slate-600 shrink-0">

@@ -3,14 +3,14 @@
         <div class="flex items-center justify-between h-20">
             <!-- Brand Logo -->
             <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
                     <i class="fa-solid fa-graduation-cap text-xl"></i>
                 </div>
                 <div>
                     <span class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
-                        MPR <span class="text-blue-600 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200/60 uppercase tracking-wider">Official</span>
+                        {{ $site->singkatan }} <span class="text-blue-600 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200/60 uppercase tracking-wider">Official</span>
                     </span>
-                    <p class="text-xs text-slate-500 font-medium tracking-wide">Majelis Permusyawaratann Rayon</p>
+                    <p class="text-xs text-slate-500 font-medium tracking-wide">{{ $site->namaLengkap }} - {{ $site->namaSekolah }}</p>
                 </div>
             </a>
 

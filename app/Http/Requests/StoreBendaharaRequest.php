@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreBendaharaRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreBendaharaRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check() && Auth::user()->canEditPenilaian();
+        return Auth::user()?->hasAnyRole(['bendahara', 'ketua', 'admin']) ?? false;
     }
 
     /**

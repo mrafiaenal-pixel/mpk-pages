@@ -59,7 +59,7 @@ class DivisionMember extends Model
             return $query;
         }
 
-        return $query->where('id_sekbid', $user->accessibleDivisionId());
+        return $query->whereIn('id_sekbid', $user->accessibleDivisionIds());
     }
 
     /**

@@ -6,13 +6,12 @@ use App\Http\Requests\StoreBendaharaRequest;
 use App\Models\Bendahara;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Routing\Controllers\Middleware;
 
 class BendaharaController extends Controller
 {
     public function __construct()
     {
-        new Middleware('role:bendahara|ketua|komc|guru|admin|mpk');
+        $this->middleware('role:bendahara|ketua|admin');
     }
 
     /**
@@ -42,7 +41,7 @@ class BendaharaController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('keterangan', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($u) use ($search) {
-                        $u->where('username', 'like', '%' . $search . '%');
+                        $u->where('username', 'like', '%'.$search.'%');
                     });
             });
         }
@@ -56,7 +55,7 @@ class BendaharaController extends Controller
                 'tipe' => $request->input('tipe'),
                 'dari' => $request->input('dari'),
                 'sampai' => $request->input('sampai'),
-            ], fn($value): bool => $value !== null && $value !== ''),
+            ], fn ($value): bool => $value !== null && $value !== ''),
             'userRole' => $user->role,
         ]);
     }
@@ -72,8 +71,8 @@ class BendaharaController extends Controller
 
         Bendahara::create($validated);
 
-        return redirect()->route('bendahara.index')
-            ->with('success', "Transaksi kas {$validated['tipe']} Rp " . number_format($validated['nominal'], 0, ',', '.') . ' berhasil dicatat.');
+        return redirect()->route('admin.bendahara.index')
+            ->with('success', "Transaksi kas {$validated['tipe']} Rp ".number_format($validated['nominal'], 0, ',', '.').' berhasil dicatat.');
     }
 
     /**
@@ -95,7 +94,7 @@ class BendaharaController extends Controller
 
         $rows = $uangKas->latest('tanggal')->get();
 
-        $namaBerkas = 'uang-kas-' . now()->format('Ymd-His') . '.csv';
+        $namaBerkas = 'uang-kas-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function () use ($rows): void {
             $handle = fopen('php://output', 'wb');
@@ -118,7 +117,7 @@ class BendaharaController extends Controller
                     $row->user?->username,
                     $row->keterangan,
                     $row->tipe,
-                    'Rp ' . number_format($row->nominal, 0, ',', '.'),
+                    'Rp '.number_format($row->nominal, 0, ',', '.'),
                 ], ';');
             }
 

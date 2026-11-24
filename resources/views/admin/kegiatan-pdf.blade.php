@@ -1,6 +1,6 @@
 @extends('layout.admin')
 
-@section('title', 'Laporan Kegiatan OSIS / MPK')
+@section('title', 'Laporan Kegiatan OSIS / {{ $site->singkatan }}')
 
 @section('content')
     <div class="space-y-8">
@@ -8,8 +8,8 @@
         <!-- Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Laporan Kegiatan OSIS / MPK</h1>
-                <p class="text-xs text-slate-500 mt-1">Daftar seluruh program kerja OSIS / MPK beserta status pelaksanaannya.
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Laporan Kegiatan OSIS / {{ $site->singkatan }}</h1>
+                <p class="text-xs text-slate-500 mt-1">Daftar seluruh program kerja OSIS / {{ $site->singkatan }} beserta status pelaksanaannya.
                 </p>
             </div>
             <div class="flex items-center gap-3">
@@ -158,7 +158,7 @@
             <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h3 class="text-base font-bold text-slate-900">Daftar Program Kerja</h3>
-                    <p class="text-xs text-slate-500">Seluruh kegiatan OSIS / MPK yang tercatat di sistem.</p>
+                    <p class="text-xs text-slate-500">Seluruh kegiatan OSIS / {{ $site->singkatan }} yang tercatat di sistem.</p>
                 </div>
                 <span id="counterKegiatan"
                     class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-600">

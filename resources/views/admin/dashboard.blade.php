@@ -203,7 +203,7 @@
                                 {{ $penilaian->aspect?->tanggal_penilaian?->translatedFormat('d M Y') ?? '-' }}
                             </td>
                             <td class="py-4 px-6 text-right font-medium text-slate-600">
-                                {{ $penilaian->user?->username ?? 'MPK' }}
+                                {{ $penilaian->user?->username ?? $site->singkatan }}
                             </td>
                         </tr>
                     @empty

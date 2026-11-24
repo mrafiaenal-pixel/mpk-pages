@@ -5,7 +5,11 @@ use App\Http\Controllers\AspirationController;
 use App\Http\Controllers\AspirationManagementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BendaharaController;
+use App\Http\Controllers\DailyLifeController;
+use App\Http\Controllers\DivisionMemberController;
+use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PenilaianController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RekapController;
 use App\Http\Controllers\WorkProgramController;
 use App\Models\Aspiration;
@@ -46,6 +50,25 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Profile routes (all authenticated users)
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    Route::get('/search', [AdminController::class, 'search'])->name('search');
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Daily Life routes (all authenticated users)
+    Route::get('/daily-life', [DailyLifeController::class, 'index'])->name('daily-life.index');
+    Route::post('/daily-life', [DailyLifeController::class, 'store'])->name('daily-life.store');
+    Route::delete('/daily-life/{dailyLife}', [DailyLifeController::class, 'destroy'])->name('daily-life.destroy');
+});
+
+// Pengaturan organisasi: ketua & komc (admin otomatis diizinkan oleh middleware role)
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:ketua,komc'])->group(function () {
+    Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
+    Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
+});
+
 // API routes for chart visualization
 Route::get('/api/penilaian/gds-piket', [PenilaianController::class, 'getGdsPiketData'])
     ->name('api.penilaian.gds-piket');
@@ -67,6 +90,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role'])->group(func
     Route::get('/sekbid', [AdminController::class, 'sekbid'])->name('sekbid');
     Route::patch('/sekbid/{divisi}/penugasan', [AdminController::class, 'updatePenugasanSekbid'])->name('sekbid.penugasan');
 
+    // Division Member CRUD (masing-masing sekbid bisa mengatur anggota)
+    Route::post('/sekbid/{division}/members', [DivisionMemberController::class, 'store'])->name('sekbid.members.store');
+    Route::patch('/sekbid/members/{member}', [DivisionMemberController::class, 'update'])->name('sekbid.members.update');
+    Route::delete('/sekbid/members/{member}', [DivisionMemberController::class, 'destroy'])->name('sekbid.members.destroy');
+
     // Penilaian routes - with role-based access
     // komc and ketua can view and manage all assessments
     // guru can view and create assessments
@@ -83,11 +111,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role'])->group(func
     Route::get('/rekap/export', [RekapController::class, 'export'])->name('rekap.export');
     Route::get('/rekap/export-pdf', [RekapController::class, 'exportPdf'])->name('rekap.export.pdf');
 
-    // Aspirasi routes - with role-based access including bendahara
-    Route::get('/aspirasi', [AspirationManagementController::class, 'index'])->name('aspirasi');
-    Route::patch('/aspirasi/{aspirasi}', [AspirationManagementController::class, 'update'])->name('aspirasi.update');
-    Route::get('/aspirasi/export', [AspirationManagementController::class, 'export'])->name('aspirasi.export');
-    Route::get('/aspirasi/export-pdf', [AspirationManagementController::class, 'exportPdf'])->name('aspirasi.export.pdf');
+    // Aspirasi hanya untuk Kom B, Kom C, Ketua, Guru (admin diizinkan middleware)
+    Route::middleware('role:komb,komc,ketua,guru')->group(function () {
+        Route::get('/aspirasi', [AspirationManagementController::class, 'index'])->name('aspirasi');
+        Route::patch('/aspirasi/{aspirasi}', [AspirationManagementController::class, 'update'])->name('aspirasi.update');
+        Route::get('/aspirasi/export', [AspirationManagementController::class, 'export'])->name('aspirasi.export');
+        Route::get('/aspirasi/export-pdf', [AspirationManagementController::class, 'exportPdf'])->name('aspirasi.export.pdf');
+    });
 
     // Kegiatan routes - accessible to admin, ketua, komc, guru
     Route::get('/kegiatan', [WorkProgramController::class, 'index'])->name('kegiatan');

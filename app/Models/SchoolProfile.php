@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['nama_sekolah', 'email_sekolah', 'nama_mpk', 'descripsi_profile'])]
+#[Fillable(['nama_sekolah', 'email_sekolah', 'nama_mpk', 'nama_lengkap', 'descripsi_profile', 'komisi'])]
 class SchoolProfile extends Model
 {
     use HasFactory;
@@ -24,6 +24,20 @@ class SchoolProfile extends Model
         'nama_sekolah',
         'email_sekolah',
         'nama_mpk',
+        'nama_lengkap',
         'descripsi_profile',
+        'komisi',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'komisi' => 'array',
+        ];
+    }
 }

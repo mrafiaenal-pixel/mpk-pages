@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateAspirasiRequest;
 use App\Models\Aspiration;
 use App\Models\KategoriAspirasi;
+use App\Services\SiteSettings;
 use Barryvdh\LaravelDompdf\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AspirationManagementController extends Controller
 {
+    public function __construct(private readonly SiteSettings $site) {}
+
     /**
      * Daftar aspirasi dengan filter status, kategori, dan pencarian.
      */
@@ -27,7 +30,7 @@ class AspirationManagementController extends Controller
     }
 
     /**
-     * Perbarui status sekaligus simpan tanggapan dan catatan internal MPK.
+     * Perbarui status sekaligus simpan tanggapan dan catatan internal organisasi.
      */
     public function update(UpdateAspirasiRequest $request, Aspiration $aspirasi)
     {
@@ -55,7 +58,7 @@ class AspirationManagementController extends Controller
 
             fputcsv($handle, [
                 'ID', 'Tanggal Masuk', 'Pengirim', 'Judul', 'Deskripsi', 'Kategori',
-                'Status', 'Tanggapan MPK', 'Catatan Internal', 'Ditangani Oleh',
+                'Status', 'Tanggapan '.$this->site->singkatan, 'Catatan Internal', 'Ditangani Oleh',
             ], ';');
 
             foreach ($rows as $row) {

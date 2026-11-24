@@ -43,14 +43,14 @@ class AdminAndAuthTest extends TestCase
     {
         $user = User::create([
             'username' => 'rafi_admin',
-            'email' => 'rafi@mpk.id',
-            'password' => Hash::make('secret123'),
-            'role' => 'mpk',
+            'email' => 'rafi@osis.id',
+            'password' => Hash::make('password'),
+            'role' => 'ketua',
         ]);
 
         $response = $this->post('/login', [
             'login' => 'rafi_admin',
-            'password' => 'secret123',
+            'password' => 'password',
         ]);
 
         $response->assertRedirect(route('admin.dashboard'));
@@ -61,9 +61,9 @@ class AdminAndAuthTest extends TestCase
     {
         $user = User::create([
             'username' => 'admin_test',
-            'email' => 'test@mpk.id',
+            'email' => 'test@osis.id',
             'password' => Hash::make('password'),
-            'role' => 'mpk',
+            'role' => 'ketua',
         ]);
 
         $response = $this->actingAs($user)->get('/admin/dashboard');
@@ -71,13 +71,13 @@ class AdminAndAuthTest extends TestCase
         $response->assertSee('Ikhtisar Dashboard');
     }
 
-    public function test_mpk_can_store_penilaian(): void
+    public function test_koma_can_store_penilaian(): void
     {
         $user = User::create([
             'username' => 'penilai_user',
-            'email' => 'penilai@mpk.id',
+            'email' => 'penilai@osis.id',
             'password' => Hash::make('password'),
-            'role' => 'mpk',
+            'role' => 'koma',
         ]);
 
         $divisi = Division::create(['nama_sekbid' => 'Sekbid 1: Ketaqwaan']);
@@ -103,9 +103,9 @@ class AdminAndAuthTest extends TestCase
     {
         $user = User::create([
             'username' => 'validator',
-            'email' => 'validator@mpk.id',
+            'email' => 'validator@osis.id',
             'password' => Hash::make('password'),
-            'role' => 'mpk',
+            'role' => 'koma',
         ]);
 
         $divisi = Division::create(['nama_sekbid' => 'Sekbid 1: Ketaqwaan']);
@@ -120,13 +120,13 @@ class AdminAndAuthTest extends TestCase
         $this->assertDatabaseCount('tr_penilaian', 0);
     }
 
-    public function test_admin_can_update_aspirasi_status_and_tanggapan(): void
+    public function test_ketua_can_update_aspirasi_status_and_tanggapan(): void
     {
         $user = User::create([
             'username' => 'admin_aspirasi',
-            'email' => 'admin_asp@mpk.id',
+            'email' => 'admin_asp@osis.id',
             'password' => Hash::make('password'),
-            'role' => 'mpk',
+            'role' => 'ketua',
         ]);
 
         $aspirasi = Aspiration::create([

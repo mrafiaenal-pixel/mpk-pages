@@ -7,14 +7,19 @@ use App\Models\AspekPenilaian;
 use App\Models\Assesment;
 use App\Services\PenilaianFilter;
 use App\Services\PenilaiSkor;
+use App\Services\SiteSettings;
 use Barryvdh\LaravelDompdf\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PenilaianController extends Controller
 {
-    public function __construct(private readonly PenilaianFilter $filter) {}
+    public function __construct(
+        private readonly PenilaianFilter $filter,
+        private readonly SiteSettings $site,
+    ) {}
 
     /**
      * Daftar penilaian kinetic dengan filter divisi, anggota, penilai, dan tanggal.
@@ -23,20 +28,8 @@ class PenilaianController extends Controller
     {
         $user = $request->user();
 
-        // Cek role user - aturan akses:
-        // - ketua, komc, guru: bisa melihat daftar penilaian lengkap
-        // - bendahara: bisa melihat tapi hanya untuk input referensi, tidak bisa edit
-        // - anggota: hanya bisa input, tidak bisa melihat daftar penilaian
-        // - admin/mpk: bisa semua
-        if ($user->isBendahara()) {
-            // Bendahara bisa melihat daftar tapi dengan batasan
-            // (boleh lihat tapi fitur edit dihapus)
-        } elseif ($user->isAnggota()) {
-            // Anggota hanya bisa input, tidak boleh melihat daftar penilaian
-            return redirect()->route('admin.dashboard')
-                ->with('error', 'Anda hanya boleh menginput penilaian, tidak boleh melihat daftar.');
-        }
-
+        // Anggota dan bendahara hanya mendapat formulir input; daftar penilaian
+        // disembunyikan oleh view melalui canViewPenilaianDaftar().
         $penilaians = $this->filter->build($request, $user)
             ->paginate(10)
             ->withQueryString();
@@ -50,7 +43,7 @@ class PenilaianController extends Controller
             'penilaiList' => $this->filter->parameterAktif($request),
             'statistik' => $this->ringkasan($this->filter->build($request, $user)),
             'userRole' => $user->role,
-            'showEditButtons' => $user->canEditPenilaian() || $user->isAdminOrMpk(),
+            'showEditButtons' => $user->canEditPenilaian() || $user->isAdmin(),
         ]);
     }
 
@@ -61,18 +54,22 @@ class PenilaianController extends Controller
     {
         $validated = $request->validated();
 
-        $aspek = AspekPenilaian::create([
-            ...$validated,
-            'inisiatif_bantuan' => $request->boolean('inisiatif_bantuan'),
-        ]);
+        $aspek = DB::transaction(function () use ($validated, $request) {
+            $aspek = AspekPenilaian::create([
+                ...$validated,
+                'inisiatif_bantuan' => $request->boolean('inisiatif_bantuan'),
+            ]);
 
-        $aspek->refreshSkor();
+            $aspek->refreshSkor();
 
-        Assesment::create([
-            'id_anggota_sekbid' => $validated['id_anggota_sekbid'],
-            'id_users' => $request->user()->id_users,
-            'id_aspek_penilaian' => $aspek->id,
-        ]);
+            Assesment::create([
+                'id_anggota_sekbid' => $validated['id_anggota_sekbid'],
+                'id_users' => $request->user()->id_users,
+                'id_aspek_penilaian' => $aspek->id,
+            ]);
+
+            return $aspek;
+        });
 
         return redirect()->route('admin.penilaian')
             ->with('success', "Penilaian berhasil disimpan dengan nilai {$aspek->nilai} ({$aspek->predikat()}).");
@@ -83,7 +80,7 @@ class PenilaianController extends Controller
      */
     public function destroy(Request $request, Assesment $penilaian)
     {
-        // Hanya komc, ketua, dan admin/mpk yang bisa menghapus penilaian
+        // Hanya komc, ketua, dan admin yang bisa menghapus penilaian
         if (! $request->user()->canEditPenilaian()) {
             abort_unless(false, 403);
         }
@@ -102,8 +99,8 @@ class PenilaianController extends Controller
      */
     public function export(Request $request): StreamedResponse
     {
-        // Hanya komc, ketua, guru, dan admin/mpk yang bisa export
-        if (! $request->user()->canEditPenilaian() && ! $request->user()->isAdminOrMpk()) {
+        // Hanya komc, ketua, guru, dan admin yang bisa export
+        if (! $request->user()->canEditPenilaian() && ! $request->user()->isAdmin()) {
             return redirect()->route('admin.dashboard')
                 ->with('error', 'Anda tidak memiliki akses untuk ekspor data.');
         }
@@ -121,7 +118,7 @@ class PenilaianController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             fputcsv($handle, [
-                'ID', 'Tanggal', 'Seksi Bidang', 'Anggota', 'MPK Penilai',
+                'ID', 'Tanggal', 'Seksi Bidang', 'Anggota', $this->site->singkatan.' Penilai',
                 'Keaktifan GDS', 'Piket RO', 'Kekompakan', 'Komunikasi',
                 'Kehadiran Rapat', 'Pelaksanaan Progja', 'Inisiatif Bantuan',
                 'Total Poin', 'Nilai', 'Predikat', 'Catatan',
@@ -161,8 +158,8 @@ class PenilaianController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        // Hanya komc, ketua, guru, dan admin/mpk yang bisa export PDF
-        if (! $request->user()->canEditPenilaian() && ! $request->user()->isAdminOrMpk()) {
+        // Hanya komc, ketua, guru, dan admin yang bisa export PDF
+        if (! $request->user()->canEditPenilaian() && ! $request->user()->isAdmin()) {
             return redirect()->route('admin.dashboard')
                 ->with('error', 'Anda tidak memiliki akses untuk ekspor PDF.');
         }
@@ -208,14 +205,14 @@ class PenilaianController extends Controller
 
     /**
      * API: Dapatkan data GDS vs Piket RO per divisi untuk chart.
-     * Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses.
+     * Hanya komc, ketua, guru, dan admin yang bisa mengakses.
      */
     public function getGdsPiketData(Request $request)
     {
         $user = $request->user();
 
-        // Hanya komc, ketua, guru, dan admin/mpk yang bisa melihat chart
-        if (! $user->canViewChart() && ! $user->isAdminOrMpk()) {
+        // Hanya komc, ketua, guru, dan admin yang bisa melihat chart
+        if (! $user->canViewChart() && ! $user->isAdmin()) {
             return response()->json(['error' => 'Forbidden'], 403);
         }
 
@@ -258,14 +255,14 @@ class PenilaianController extends Controller
 
     /**
      * API: Dapatkan data distribusi poin per aspek penilaian.
-     * Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses.
+     * Hanya komc, ketua, guru, dan admin yang bisa mengakses.
      */
     public function getAspekData(Request $request)
     {
         $user = $request->user();
 
-        // Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses chart
-        if (! $user->canViewChart() && ! $user->isAdminOrMpk()) {
+        // Hanya komc, ketua, guru, dan admin yang bisa mengakses chart
+        if (! $user->canViewChart() && ! $user->isAdmin()) {
             return response()->json(['error' => 'Forbidden'], 403);
         }
 
@@ -304,14 +301,14 @@ class PenilaianController extends Controller
 
     /**
      * API: Dapatkan statistik per divisi.
-     * Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses.
+     * Hanya komc, ketua, guru, dan admin yang bisa mengakses.
      */
     public function getDivisiStats(Request $request)
     {
         $user = $request->user();
 
-        // Hanya komc, ketua, guru, dan admin/mpk yang bisa mengakses
-        if (! $user->canViewChart() && ! $user->isAdminOrMpk()) {
+        // Hanya komc, ketua, guru, dan admin yang bisa mengakses
+        if (! $user->canViewChart() && ! $user->isAdmin()) {
             return response()->json(['error' => 'Forbidden'], 403);
         }
 

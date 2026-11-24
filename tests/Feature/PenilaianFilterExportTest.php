@@ -219,13 +219,13 @@ class PenilaianFilterExportTest extends TestCase
         $this->assertSame('Sangat Baik', $aspek->predikat());
     }
 
-    public function test_penugasan_mpk_to_division(): void
+    public function test_penugasan_penilai_to_division(): void
     {
         $mpk = User::create([
-            'username' => 'mpk_baru',
-            'email' => 'baru@mpk.id',
+            'username' => 'penilai_baru',
+            'email' => 'baru@osis.id',
             'password' => Hash::make('password'),
-            'role' => 'mpk',
+            'role' => 'komb',
         ]);
 
         $response = $this->actingAs($this->ketuaMpk)
@@ -264,10 +264,10 @@ class PenilaianFilterExportTest extends TestCase
     public function test_scoped_mpk_cannot_assign_other_mpk(): void
     {
         $mpkLain = User::create([
-            'username' => 'mpk_lain',
-            'email' => 'lain@mpk.id',
+            'username' => 'penilai_lain',
+            'email' => 'lain@osis.id',
             'password' => Hash::make('password'),
-            'role' => 'mpk',
+            'role' => 'komb',
         ]);
 
         // Rafi mencoba menugaskan MPK lain; harus ditolak karena bukan tanpa assignment.
@@ -338,16 +338,16 @@ class PenilaianFilterExportTest extends TestCase
 
         $this->ketuaMpk = User::create([
             'username' => 'ketua',
-            'email' => 'ketua@mpk.id',
+            'email' => 'ketua@osis.id',
             'password' => Hash::make('password'),
-            'role' => 'mpk',
+            'role' => 'ketua',
         ]);
 
         $this->rafi = User::create([
             'username' => 'rafi',
-            'email' => 'rafi@mpk.id',
+            'email' => 'rafi@osis.id',
             'password' => Hash::make('password'),
-            'role' => 'mpk',
+            'role' => 'komc',
             'id_sekbid' => $this->divisiDelapan->id,
         ]);
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkProgramRequest;
 use App\Models\WorkProgram;
+use App\Services\SiteSettings;
 use Barryvdh\LaravelDompdf\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -11,8 +12,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WorkProgramController extends Controller
 {
+    public function __construct(private readonly SiteSettings $site) {}
+
     /**
-     * Daftar kegiatan OSIS / MPR dengan filter dan pencarian.
+     * Daftar kegiatan OSIS / organisasi dengan filter dan pencarian.
      */
     public function index(Request $request)
     {
@@ -32,36 +35,36 @@ class WorkProgramController extends Controller
     }
 
     /**
-     * Simpan kegiatan OSIS / MPR baru.
+     * Simpan kegiatan OSIS / organisasi baru.
      */
     public function store(StoreWorkProgramRequest $request)
     {
         WorkProgram::create($request->validated());
 
         return redirect()->route('admin.kegiatan')
-            ->with('success', 'Kegiatan OSIS / MPR berhasil ditambahkan.');
+            ->with('success', 'Kegiatan OSIS / '.$this->site->singkatan.' berhasil ditambahkan.');
     }
 
     /**
-     * Perbarui kegiatan OSIS / MPR.
+     * Perbarui kegiatan OSIS / organisasi.
      */
     public function update(StoreWorkProgramRequest $request, WorkProgram $kegiatan)
     {
         $kegiatan->update($request->validated());
 
         return redirect()->route('admin.kegiatan')
-            ->with('success', 'Kegiatan OSIS / MPR berhasil diperbarui.');
+            ->with('success', 'Kegiatan OSIS / '.$this->site->singkatan.' berhasil diperbarui.');
     }
 
     /**
-     * Hapus kegiatan OSIS / MPR.
+     * Hapus kegiatan OSIS / organisasi.
      */
     public function destroy(Request $request, WorkProgram $kegiatan)
     {
         $kegiatan->delete();
 
         return redirect()->route('admin.kegiatan', $request->only(['q', 'status']))
-            ->with('success', 'Kegiatan OSIS / MPR berhasil dihapus.');
+            ->with('success', 'Kegiatan OSIS / '.$this->site->singkatan.' berhasil dihapus.');
     }
 
     /**

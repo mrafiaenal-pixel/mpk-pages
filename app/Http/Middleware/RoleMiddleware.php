@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class RoleMiddleware
     {
         $user = Auth::user();
 
-        if (! $user) {
+        if (! $user instanceof User) {
             return redirect()->route('login');
         }
 
@@ -47,10 +48,8 @@ class RoleMiddleware
             return $next($request);
         }
 
-        $userRole = (string) $user->role;
-
-        // Admin and MPK can bypass or be included
-        if (in_array($userRole, $allowedRoles, true) || $userRole === 'admin' || $userRole === 'mpk') {
+        // Admin always bypasses role restrictions.
+        if ($user->hasAnyRole($allowedRoles) || $user->isAdmin()) {
             return $next($request);
         }
 

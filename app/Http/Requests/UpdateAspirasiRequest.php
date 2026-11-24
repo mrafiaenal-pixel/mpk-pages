@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\SiteSettings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -31,7 +32,7 @@ class UpdateAspirasiRequest extends FormRequest
     {
         return [
             'status_aspirasi.required' => 'Status aspirasi wajib dipilih.',
-            'tanggapan_mpk.max' => 'Tanggapan MPK maksimal 2000 karakter.',
+            'tanggapan_mpk.max' => 'Tanggapan '.app(SiteSettings::class)->singkatan.' maksimal 2000 karakter.',
             'catatan_internal.max' => 'Catatan internal maksimal 2000 karakter.',
         ];
     }

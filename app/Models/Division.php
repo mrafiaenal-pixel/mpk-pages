@@ -34,7 +34,7 @@ class Division extends Model
     }
 
     /**
-     * MPK yang ditugaskan menangani sekbid ini.
+     * Penilai yang ditugaskan sebagai penanggung jawab sekbid ini.
      */
     public function assessors(): HasMany
     {

@@ -65,8 +65,8 @@ class Assesment extends Model
     }
 
     /**
-     * Batasi query pada divisi yang boleh diakses pengguna. MPK dengan
-     * assignment divisi hanya melihat penilaian divisi tersebut.
+     * Batasi query pada divisi yang boleh diakses pengguna. Penilai dengan
+     * penugasan divisi hanya melihat penilaian pada divisi-divisi tersebut.
      *
      * @param  Builder<Assesment>  $query
      * @return Builder<Assesment>
@@ -79,7 +79,7 @@ class Assesment extends Model
 
         return $query->whereHas(
             'divisionMember',
-            fn (Builder $member) => $member->where('id_sekbid', $user->accessibleDivisionId())
+            fn (Builder $member) => $member->whereIn('id_sekbid', $user->accessibleDivisionIds())
         );
     }
 }

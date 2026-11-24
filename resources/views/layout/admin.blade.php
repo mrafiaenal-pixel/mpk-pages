@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Admin Dashboard') - MPK Portal</title>
+    <title>@yield('title', 'Admin Dashboard') - {{ $site->singkatan }} Portal</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,11 +53,12 @@
                         <i class="fa-solid fa-bars text-lg"></i>
                     </button>
 
-                    <div class="relative w-full max-w-md hidden sm:block">
+                    <form method="GET" action="{{ route('admin.search') }}" class="relative w-full max-w-md hidden sm:block">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" placeholder="Cari data sekbid, anggota, atau aspirasi..." 
+                        <input type="search" name="q" value="{{ request('q') }}" aria-label="Cari data sekbid, anggota, atau aspirasi"
+                               placeholder="Cari data sekbid, anggota, atau aspirasi..."
                                class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-hidden transition-all text-slate-800">
-                    </div>
+                    </form>
                 </div>
 
                 <!-- Right Quick Stats & User Profile -->
@@ -78,7 +79,7 @@
 
                     <!-- User Dropdown -->
                     <div class="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-blue-900 text-white flex items-center justify-center font-bold text-xs shadow-xs">
                             {{ strtoupper(substr(auth()->user()->username ?? 'A', 0, 1)) }}
                         </div>
                         <div class="hidden sm:block text-left">
@@ -116,12 +117,12 @@
                 <!-- Flash Notification -->
                 @if(session('success'))
                     <div x-data="{ show: true }" x-show="show" 
-                         class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between shadow-xs">
+                         class="mb-6 p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold flex items-center justify-between shadow-xs">
                         <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                            <i class="fa-solid fa-circle-check text-blue-600 text-base"></i>
                             <span>{{ session('success') }}</span>
                         </div>
-                        <button @click="show = false" class="text-emerald-600 hover:text-emerald-800">
+                        <button @click="show = false" class="text-blue-600 hover:text-blue-800">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>

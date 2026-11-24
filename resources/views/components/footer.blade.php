@@ -7,10 +7,10 @@
                     <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30">
                         <i class="fa-solid fa-graduation-cap text-lg"></i>
                     </div>
-                    <span class="text-xl font-bold text-white tracking-tight">MPK Portal</span>
+                    <span class="text-xl font-bold text-white tracking-tight">{{ $site->singkatan }} Portal</span>
                 </div>
                 <p class="text-sm text-slate-400 leading-relaxed max-w-sm">
-                    Majelis Perwakilan Kelas merupakan badan legislatif siswa yang menampung aspirasi, mengawasi kinerja Seksi Bidang OSIS, serta menjadi jembatan komunikasi antara siswa dan pihak sekolah.
+                    {{ $site->namaLengkap }} ({{ $site->singkatan }}) di {{ $site->namaSekolah }} merupakan wadah aspirasi siswa, pengawasan kinerja Seksi Bidang OSIS, serta jembatan komunikasi antara siswa dan pihak sekolah.
                 </p>
                 <div class="flex items-center gap-3 pt-2">
                     <a href="#" class="w-9 h-9 rounded-lg bg-slate-800/80 hover:bg-blue-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors">
@@ -47,7 +47,7 @@
                     <li><a href="#aspirasi" class="hover:text-blue-400 transition-colors">Formulir Aspirasi</a></li>
                     <li><a href="#alur-aspirasi" class="hover:text-blue-400 transition-colors">Alur Pengaduan</a></li>
                     <li><a href="#penilaian" class="hover:text-blue-400 transition-colors">Indeks Kinerja Sekbid</a></li>
-                    <li><a href="#struktur" class="hover:text-blue-400 transition-colors">Komisi MPK</a></li>
+                    <li><a href="#struktur" class="hover:text-blue-400 transition-colors">Komisi {{ $site->singkatan }}</a></li>
                 </ul>
             </div>
 
@@ -57,11 +57,11 @@
                 <ul class="space-y-2.5 text-sm text-slate-400">
                     <li class="flex items-start gap-2.5">
                         <i class="fa-solid fa-location-dot mt-1 text-blue-500"></i>
-                        <span>Ruang MPK / OSIS Gedung Kesiswaan</span>
+                        <span>Ruang {{ $site->singkatan }} / OSIS Gedung Kesiswaan</span>
                     </li>
                     <li class="flex items-center gap-2.5">
                         <i class="fa-solid fa-envelope text-blue-500"></i>
-                        <span>mpk.official@sekolah.sch.id</span>
+                        <span>{{ $site->email }}</span>
                     </li>
                     <li class="flex items-center gap-2.5">
                         <i class="fa-solid fa-clock text-blue-500"></i>
@@ -72,7 +72,7 @@
         </div>
 
         <div class="mt-12 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <p>&copy; {{ date('Y') }} Majelis Perwakilan Kelas (MPK). Seluruh Hak Cipta Dilindungi.</p>
+            <p>&copy; {{ date('Y') }} {{ $site->namaLengkap }} ({{ $site->singkatan }}). Seluruh Hak Cipta Dilindungi.</p>
             <div class="flex items-center gap-6">
                 <a href="#" class="hover:text-slate-400 transition-colors">Kebijakan Privasi</a>
                 <a href="#" class="hover:text-slate-400 transition-colors">Syarat & Ketentuan</a>

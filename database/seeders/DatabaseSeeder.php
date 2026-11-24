@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
             [
                 'email' => 'rafi@smkwikrama.sch.id',
                 'password' => Hash::make('password'),
-                'role' => 'mpk',
+                'role' => 'komc',
             ]
         );
 
@@ -88,6 +88,141 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Role Kom C (akses seluruh sekbid, sama seperti admin)
+        User::firstOrCreate(
+            ['username' => 'komc'],
+            [
+                'email' => 'komc@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komc',
+            ]
+        );
+
+        // Role Ketua (akses sama seperti kom c)
+        User::firstOrCreate(
+            ['username' => 'ketua'],
+            [
+                'email' => 'ketua@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'ketua',
+            ]
+        );
+
+        // Role Kom C (seluruh sekbid)
+        User::firstOrCreate(
+            ['username' => 'rafi'],
+            [
+                'email' => 'rafi@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komc',
+                'id_sekbid' => null,
+            ]
+        );
+
+        // Role Samuel (seluruh sekbid)
+        User::firstOrCreate(
+            ['username' => 'samuel'],
+            [
+                'email' => 'samuel@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komc',
+                'id_sekbid' => null,
+            ]
+        );
+
+        // Role Kiran (seluruh sekbid)
+        User::firstOrCreate(
+            ['username' => 'kiran'],
+            [
+                'email' => 'kiran@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komc',
+                'id_sekbid' => null,
+            ]
+        );
+
+        // Role Kom B (input penilaian + baca aspirasi)
+        User::firstOrCreate(
+            ['username' => 'komb'],
+            [
+                'email' => 'komb@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komb',
+                'id_sekbid' => null,
+            ]
+        );
+
+        // Role Iksan (Kom B)
+        User::firstOrCreate(
+            ['username' => 'iksan'],
+            [
+                'email' => 'iksan@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komb',
+            ]
+        );
+
+        // Role Denis (Kom B)
+        User::firstOrCreate(
+            ['username' => 'denis'],
+            [
+                'email' => 'denis@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komb',
+            ]
+        );
+
+        // Role Redina: Komisi B sekaligus bendahara (sekbid 6 dan 1)
+        User::firstOrCreate(
+            ['username' => 'redina'],
+            [
+                'email' => 'redina@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'komb',
+                'role_tambahan' => 'bendahara',
+            ]
+        );
+
+        // Role Ezri (sekbid 5 dan 1, juga sebagai ketua)
+        User::firstOrCreate(
+            ['username' => 'ezri'],
+            [
+                'email' => 'ezri@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'ketua',
+            ]
+        );
+
+        // Role Kom A (input penilaian + tambah aturan organisasi)
+        User::firstOrCreate(
+            ['username' => 'koma'],
+            [
+                'email' => 'koma@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'koma',
+            ]
+        );
+
+        // Role Sena (Kom A)
+        User::firstOrCreate(
+            ['username' => 'sena'],
+            [
+                'email' => 'sena@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'koma',
+            ]
+        );
+
+        // Role Ezra (Kom A)
+        User::firstOrCreate(
+            ['username' => 'ezra'],
+            [
+                'email' => 'ezra@smkwikrama.sch.id',
+                'password' => Hash::make('password'),
+                'role' => 'koma',
+            ]
+        );
+
         // 2. Kategori Aspirasi
         $kategoris = [
             ['kode_kategori' => 'SARPRAS', 'nama_kategori' => 'Sarana & Prasarana Sekolah'],
@@ -102,18 +237,18 @@ class DatabaseSeeder extends Seeder
             KategoriAspirasi::updateOrCreate(['kode_kategori' => $k['kode_kategori']], $k);
         }
 
-        // 3. 10 Seksi Bidang (Sekbid) & Anggota
+        // 3. 10 Seksi Bidang (Sekbid) & Anggota (data baru)
         $daftarSekbid = [
-            ['nama' => 'Sekbid 1: Ketaqwaan terhadap Tuhan YME', 'anggota' => ['Ahmad Zaki', 'Nurul Hikmah', 'Fauzan Adit']],
-            ['nama' => 'Sekbid 2: Budi Pekerti Luhur & Pembinaan Karakter', 'anggota' => ['Budi Santoso', 'Rina Anggraini', 'Dimas Pratama']],
-            ['nama' => 'Sekbid 3: Kepribadian Unggul & Wawasan Kebangsaan', 'anggota' => ['Bagas Ramadhan', 'Annisa Fitri', 'Reza Kurnia']],
-            ['nama' => 'Sekbid 4: Prestasi Akademik, Seni & Olahraga', 'anggota' => ['Dinda Rahma', 'Kevin Sanjaya', 'Putri Ayu']],
-            ['nama' => 'Sekbid 5: Demokrasi, HAM & Pendidikan Politik', 'anggota' => ['Farhan Malik', 'Tiara Andini', 'Genta Buana']],
-            ['nama' => 'Sekbid 6: Kreativitas, Keterampilan & Kewirausahaan', 'anggota' => ['Hendra Wijaya', 'Siti Maryam', 'Ilham Syah']],
-            ['nama' => 'Sekbid 7: Kualitas Jasmani, Kesehatan & Gizi', 'anggota' => ['Aldi Taher', 'Maya Safitri', 'Farel Prayoga']],
-            ['nama' => 'Sekbid 8: Sastra, Budaya & Pelestarian Lingkungan', 'anggota' => ['Zahra Kamila', 'Wahyu Hidayat', 'Nadia Putri']],
-            ['nama' => 'Sekbid 9: Teknologi Informasi & Komunikasi (TIK)', 'anggota' => ['Rizky Pratama', 'Vina Amalia', 'Satria Dewa']],
-            ['nama' => 'Sekbid 10: Komunikasi dalam Bahasa Asing & Literasi', 'anggota' => ['Grace Kelly', 'Jonathan Christi', 'Chelsea Olivia']],
+            ['nama' => 'Sekbid 1: Ketaqwaan terhadap Tuhan YME', 'anggota' => ['Annisa Lestari', 'Princess Felice Chandra', 'Arya Bima', 'Purnomo Yoga', 'Khalista Naraya Suci']],
+            ['nama' => 'Sekbid 2: Budi Pekerti Luhur & Pembinaan Karakter', 'anggota' => ['Halwatussani Khoerunissa', 'Balqish Adara', 'Chinesya Anggia', 'Ridwan Faiz']],
+            ['nama' => 'Sekbid 3: Kepribadian Unggul & Wawasan Kebangsaan', 'anggota' => ['Khairi Nizar Setiawan', 'Faiz Alin Nuha', 'Carvidya Nerlita', 'Aurelia Kirana Larasati']],
+            ['nama' => 'Sekbid 4: Prestasi Akademik, Seni & Olahraga', 'anggota' => ['Naufal Abdilah', 'Syifa Dwi Anggraini', 'Inara Ayudyaputri Aqilla', 'Shafa Azzahra Nurprayogo']],
+            ['nama' => 'Sekbid 5: Demokrasi, HAM & Pendidikan Politik', 'anggota' => ['Lenka Soulnya Putri', 'Risma Oktaviana Dewi', 'Muhammad Gerrard Habibie', 'Muhamad Virgiawan']],
+            ['nama' => 'Sekbid 6: Kreativitas, Keterampilan & Kewirausahaan', 'anggota' => ['Rafka Athaya Khiry', 'Qirania Alika Cherysta Putri', 'Zerlina Pavla De Raynov', 'Glenn Felix Dharmawan']],
+            ['nama' => 'Sekbid 7: Kualitas Jasmani, Kesehatan & Gizi', 'anggota' => ['Widi Rizki Pratama Kahar', 'Adinda Khairunnisa Aprilliya', 'Dyandra Kinanti Hapsari', 'Cantika Shifa Dwi Murti']],
+            ['nama' => 'Sekbid 8: Sastra, Budaya & Pelestarian Lingkungan', 'anggota' => ['Faradilla Chairanty R', 'Sassy Kirana Sarjono', 'Shofia Kamilah Wahyudi', 'Nazwa Ramadanisa']],
+            ['nama' => 'Sekbid 9: Teknologi Informasi & Komunikasi (TIK)', 'anggota' => ['Adinda Felovya', 'Oriza Aurelia Orlin', 'Muhammad Safa Naufal Fashih', 'Siti Ajeng Marufah', 'Nada Zalfa Hersya Zahirah', 'Najla Riana Azka', 'Maulidha Louise Almira', 'Anisa Dea Alfiani']],
+            ['nama' => 'Sekbid 10: Komunikasi dalam Bahasa Asing & Literasi', 'anggota' => ['Ariel Ford Hastipardji', 'Keysha Aprilia Mulya', 'Alisha Az-Zahra Suardi']],
         ];
 
         foreach ($daftarSekbid as $data) {
@@ -126,20 +261,74 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // 3b. MPK yang ditugaskan menangani satu seksi bidang saja.
-        $rafi = User::firstOrCreate(
-            ['username' => 'rafi'],
-            [
-                'email' => 'rafi@smkwikrama.sch.id',
+        // 3b. Samakan peran dan penugasan sekbid setiap akun uji.
+        $peranPerUsername = [
+            'admin' => 'admin',
+            'ketua' => 'ketua',
+            'komc' => 'komc',
+            'rafi' => 'komc',
+            'samuel' => 'komc',
+            'kiran' => 'komc',
+            'komb' => 'komb',
+            'iksan' => 'komb',
+            'denis' => 'komb',
+            'koma' => 'koma',
+            'sena' => 'koma',
+            'ezra' => 'koma',
+            'redina' => 'komb',
+            'bendahara' => 'bendahara',
+            'ezri' => 'ketua',
+            'anggota' => 'anggota',
+            'guru' => 'guru',
+        ];
+
+        $peranTambahanPerUsername = [
+            'redina' => 'bendahara',
+        ];
+
+        foreach ($peranPerUsername as $username => $role) {
+            User::where('username', $username)->update([
+                'role' => $role,
+                'role_tambahan' => $peranTambahanPerUsername[$username] ?? null,
                 'password' => Hash::make('password'),
-                'role' => 'mpk',
-            ]
-        );
+            ]);
+        }
 
-        $sekbidDelapan = Division::where('nama_sekbid', 'like', 'Sekbid 8%')->first();
+        $idSekbid = fn (int $nomor): ?int => Division::where('nama_sekbid', 'like', "Sekbid {$nomor}:%")->value('id');
 
-        if ($sekbidDelapan !== null && $rafi->id_sekbid === null) {
-            $rafi->forceFill(['id_sekbid' => $sekbidDelapan->id])->save();
+        // Penilai: sekbid 1 untuk semua, 2 ezra, 3 iksan, 4 sena, 5 ezri,
+        // 6 redina, 7-9 tanpa penugasan khusus, 10 denis.
+        $penugasanSekbid = [
+            'iksan' => [3, 1],
+            'denis' => [10, 1],
+            'redina' => [6, 1],
+            'ezri' => [5, 1],
+            'sena' => [4, 1],
+            'ezra' => [2, 1],
+        ];
+
+        $tanpaBatas = ['admin', 'ketua', 'komc', 'rafi', 'samuel', 'kiran', 'guru', 'komb', 'koma', 'anggota', 'bendahara'];
+
+        foreach ($tanpaBatas as $username) {
+            $user = User::where('username', $username)->first();
+
+            if ($user !== null) {
+                $user->sekbids()->detach();
+                $user->forceFill(['id_sekbid' => null])->save();
+            }
+        }
+
+        foreach ($penugasanSekbid as $username => $nomorSekbid) {
+            $user = User::where('username', $username)->first();
+
+            if ($user === null) {
+                continue;
+            }
+
+            $ids = array_values(array_filter(array_map($idSekbid, $nomorSekbid)));
+
+            $user->forceFill(['id_sekbid' => null])->save();
+            $user->sekbids()->sync($ids);
         }
 
         // 4. Program Kerja
@@ -181,7 +370,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // 5. Aspek Penilaian & Penilaian Sample
-        $anggotaPertama = Division::first();
+        $anggotaPertama = DivisionMember::first();
         if ($anggotaPertama) {
             $aspek = AssesmentAspect::firstOrCreate([
                 'keaktifan_gds' => 'hadir',
@@ -238,33 +427,47 @@ class DatabaseSeeder extends Seeder
         }
 
         // 7. Visi Misi
-        VissionMission::firstOrCreate([
-            'visi' => 'Mewujudkan Majelis Perwakilan Kelas sebagai lembaga legislatif siswa yang aspiratif, transparan, proaktif, dan berintegritas demi terciptanya sinergi positif seluruh warga sekolah.',
-            'misi' => "1. Menampung, mengawal, dan memperjuangkan aspirasi seluruh siswa secara transparan dan akuntabel.\n2. Melaksanakan pengawasan yang konstruktif dan terukur terhadap seluruh program kerja Seksi Bidang OSIS.\n3. Meningkatkan sinergi kolaboratif antara siswa, pengurus OSIS, pembina, dan pihak sekolah.\n4. Menegakkan kedisiplinan serta budaya musyawarah mufakat dalam setiap pengambilan keputusan.",
+        $visiMisi = VissionMission::firstOrNew([]);
+        $visiMisi->fill([
+            'visi' => 'Mewujudkan organisasi siswa yang aspiratif, transparan, dan berintegritas demi kemajuan sekolah.',
+            'misi' => "Menampung, mengawal, dan memperjuangkan seluruh aspirasi siswa secara transparan dan solutif.\nMelaksanakan pengawasan objektif terhadap 10 Seksi Bidang OSIS secara terstruktur dan terukur.\nMenjadi jembatan komunikasi yang harmonis antara siswa, pembina, dan jajaran manajemen sekolah.\nMenegakkan tata tertib dan memupuk budaya kepemimpinan berakhlak mulia.",
         ]);
+        $visiMisi->save();
 
-        // 8. Profil Kepengurusan MPK
+        // 8. Profil Kepengurusan (tiga komisi: A, B, C)
         $pengurus = [
-            ['nama_pengurus' => 'M. Rafi Pratama', 'jabatan_pengurus' => 'Ketua Umum MPK', 'komisi_pengurus' => 'Pimpinan Inti'],
-            ['nama_pengurus' => 'Aulia Syahrani', 'jabatan_pengurus' => 'Wakil Ketua MPK', 'komisi_pengurus' => 'Pimpinan Inti'],
+            ['nama_pengurus' => 'M. Rafi Pratama', 'jabatan_pengurus' => 'Ketua Umum', 'komisi_pengurus' => 'Pimpinan Inti'],
+            ['nama_pengurus' => 'Aulia Syahrani', 'jabatan_pengurus' => 'Wakil Ketua', 'komisi_pengurus' => 'Pimpinan Inti'],
             ['nama_pengurus' => 'Fathir Nugraha', 'jabatan_pengurus' => 'Sekretaris Umum', 'komisi_pengurus' => 'Pimpinan Inti'],
             ['nama_pengurus' => 'Siti Maulida', 'jabatan_pengurus' => 'Bendahara Umum', 'komisi_pengurus' => 'Pimpinan Inti'],
-            ['nama_pengurus' => 'Dava Satria', 'jabatan_pengurus' => 'Ketua Komisi A', 'komisi_pengurus' => 'Komisi A (Aspirasi & Advokasi)'],
-            ['nama_pengurus' => 'Nadila Rizka', 'jabatan_pengurus' => 'Ketua Komisi B', 'komisi_pengurus' => 'Komisi B (Pengawasan Sekbid)'],
-            ['nama_pengurus' => 'Rangga Aliansyah', 'jabatan_pengurus' => 'Ketua Komisi C', 'komisi_pengurus' => 'Komisi C (Hukum & Disiplin)'],
-            ['nama_pengurus' => 'Zahwa Tiara', 'jabatan_pengurus' => 'Ketua Komisi D', 'komisi_pengurus' => 'Komisi D (Humas & Publikasi)'],
+            ['nama_pengurus' => 'Dava Satria', 'jabatan_pengurus' => 'Ketua Komisi A', 'komisi_pengurus' => 'Komisi A'],
+            ['nama_pengurus' => 'Nadila Rizka', 'jabatan_pengurus' => 'Ketua Komisi B', 'komisi_pengurus' => 'Komisi B'],
+            ['nama_pengurus' => 'Rangga Aliansyah', 'jabatan_pengurus' => 'Ketua Komisi C', 'komisi_pengurus' => 'Komisi C'],
         ];
 
+        $keptIds = [];
         foreach ($pengurus as $p) {
-            ProfilKepengurusan::firstOrCreate(['nama_pengurus' => $p['nama_pengurus']], $p);
+            $keptIds[] = ProfilKepengurusan::updateOrCreate(
+                ['nama_pengurus' => $p['nama_pengurus']],
+                $p
+            )->getKey();
         }
+        ProfilKepengurusan::whereNotIn('id', $keptIds)->delete();
 
-        // 9. Profil Sekolah
-        SchoolProfile::firstOrCreate([
+        // 9. Profil Sekolah / identitas organisasi
+        $profil = SchoolProfile::firstOrNew([]);
+        $profil->fill([
             'nama_sekolah' => 'SMK Wikrama Bogor',
             'email_sekolah' => 'prohumasi@smkwikrama.sch.id',
-            'nama_mpk' => 'MPR SMK WIKRAMA BOGOR',
-            'descripsi_profile' => 'Wadah pembinaan kepemimpinan dan keterwakilan siswa yang berkomitmen menjaga aspirasi dan integritas.',
+            'nama_mpk' => 'MPK',
+            'nama_lengkap' => 'Majelis Perwakilan Kelas',
+            'descripsi_profile' => 'Wadah aspirasi siswa dan pengawasan kinerja seksi bidang yang berkomitmen menjaga transparansi dan integritas.',
+            'komisi' => [
+                ['kode' => 'A', 'nama' => 'Komisi A', 'deskripsi' => 'Tata Kelola Hukum'],
+                ['kode' => 'B', 'nama' => 'Komisi B', 'deskripsi' => 'Jembatan antara Siswa dan Sekolah'],
+                ['kode' => 'C', 'nama' => 'Komisi C', 'deskripsi' => 'Pengawasan & Evaluasi'],
+            ],
         ]);
+        $profil->save();
     }
 }

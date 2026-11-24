@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Aspirasi;
 use App\Models\Aspiration;
 use App\Models\KategoriAspirasi;
+use App\Services\SiteSettings;
 use Illuminate\Http\Request;
 
 class AspirationController extends Controller
 {
-    //
+    public function __construct(private readonly SiteSettings $site) {}
 
     public function index()
     {
@@ -46,6 +46,6 @@ class AspirationController extends Controller
             'kode_kategori' => $validated['kode_kategori'],
         ]);
 
-        return redirect()->back()->with('success', 'Aspirasi Anda berhasil dikirim dan akan segera ditinjau oleh MPK!');
+        return redirect()->back()->with('success', 'Aspirasi Anda berhasil dikirim dan akan segera ditinjau oleh '.$this->site->singkatan.'!');
     }
 }

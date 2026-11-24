@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'MPK - Majelis Perwakilan Kelas')</title>
+    <title>@yield('title', $site->singkatan.' - '.$site->namaLengkap)</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,15 +15,11 @@
     <!-- Font Awesome / Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Tailwind CSS v4 CDN (ensures instant pixel-perfect preview) -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Tailwind CSS bawaan Laravel (Vite) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
 
     <style>
         body {
@@ -32,7 +28,7 @@
     </style>
     @stack('styles')
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white flex flex-col min-h-screen" x-data="{ mobileMenuOpen: false }">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white flex flex-col min-h-screen @yield('bodyClass')" x-data="{ mobileMenuOpen: false }">
 
     <!-- Top Navigation Bar -->
     <x-navbar />
@@ -40,7 +36,7 @@
     <!-- Flash Alert -->
     @if(session('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" 
-             class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-emerald-600 text-white px-5 py-3.5 rounded-xl shadow-xl shadow-emerald-600/20 text-sm font-medium transition-all">
+             class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-blue-600 text-white px-5 py-3.5 rounded-xl shadow-xl shadow-blue-600/20 text-sm font-medium transition-all">
             <i class="fa-solid fa-circle-check text-lg"></i>
             <span>{{ session('success') }}</span>
             <button @click="show = false" class="ml-2 text-white/80 hover:text-white">

@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Models\WorkProgram;
 use App\Services\PenilaianFilter;
 use App\Services\PenilaiSkor;
+use App\Services\SiteSettings;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -18,7 +20,10 @@ use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
-    public function __construct(private readonly PenilaianFilter $filter) {}
+    public function __construct(
+        private readonly PenilaianFilter $filter,
+        private readonly SiteSettings $site,
+    ) {}
 
     public function dashboard(Request $request)
     {
@@ -61,38 +66,93 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Pencarian global lintas sekbid, anggota, aspirasi, dan kegiatan.
+     *
+     * @return View
+     */
+    public function search(Request $request)
+    {
+        $user = $request->user();
+        $q = trim((string) $request->input('q'));
+
+        $sekbids = collect();
+        $anggotas = collect();
+        $aspirasis = collect();
+        $progjas = collect();
+
+        if ($q !== '') {
+            $sekbids = Division::query()
+                ->where('nama_sekbid', 'like', "%{$q}%")
+                ->when($user->isDivisionScoped(), fn (Builder $query) => $query->whereKey($user->accessibleDivisionIds()))
+                ->limit(10)
+                ->get();
+
+            $anggotas = DivisionMember::query()
+                ->with('division')
+                ->visibleTo($user)
+                ->where('nama_anggota', 'like', "%{$q}%")
+                ->limit(10)
+                ->get();
+
+            if ($user->canManageAspirasi()) {
+                $aspirasis = Aspiration::query()
+                    ->where('judul_aspirasi', 'like', "%{$q}%")
+                    ->orWhere('deskripsi_aspirasi', 'like', "%{$q}%")
+                    ->orWhere('nama_pengirim', 'like', "%{$q}%")
+                    ->latest('id_aspirasi')
+                    ->limit(10)
+                    ->get();
+            }
+
+            if ($user->hasAnyRole(['admin', 'ketua', 'komc', 'koma', 'komb', 'guru'])) {
+                $progjas = WorkProgram::query()
+                    ->where('nama_progja', 'like', "%{$q}%")
+                    ->orWhere('deskripsi_progja', 'like', "%{$q}%")
+                    ->latest('id')
+                    ->limit(10)
+                    ->get();
+            }
+        }
+
+        return view('admin.search', compact('q', 'sekbids', 'anggotas', 'aspirasis', 'progjas'));
+    }
+
     public function sekbid()
     {
         $user = request()->user();
 
         $sekbids = Division::with(['members', 'assessors'])
-            ->when($user->isDivisionScoped(), fn (Builder $q) => $q->whereKey($user->accessibleDivisionId()))
+            ->when($user->isDivisionScoped(), fn (Builder $q) => $q->whereKey($user->accessibleDivisionIds()))
             ->orderBy('nama_sekbid')
             ->get();
 
         return view('admin.sekbid', [
             'sekbids' => $sekbids,
-            'daftarMpk' => User::where('role', 'mpk')->orderBy('username')->get(),
+            'daftarMpk' => User::with('sekbids')
+                ->whereIn('role', ['admin', 'komc', 'ketua', 'koma', 'komb', 'guru'])
+                ->orderBy('username')
+                ->get(),
             'canKelolaPenugasan' => ! $user->isDivisionScoped(),
         ]);
     }
 
     /**
-     * Tentukan MPK penanggung jawab satu seksi bidang. Setiap MPK hanya
-     * boleh memegang satu divisi.
+     * Tentukan penilai penanggung jawab satu seksi bidang. Setiap penilai
+     * hanya boleh memegang satu divisi sebagai penanggung jawab utama.
      */
     public function updatePenugasanSekbid(Request $request, Division $divisi)
     {
-        // Hanya MPK tanpa assignment (ketua) yang boleh menetapkan penugasan.
+        // Hanya pengurus tanpa penugasan yang boleh menetapkan penugasan.
         if ($request->user()->isDivisionScoped()) {
-            return back()->with('error', 'Hanya MPK utama yang dapat mengubah penugasan sekbid.');
+            return back()->with('error', 'Hanya pengurus tanpa penugasan yang dapat mengubah penugasan sekbid.');
         }
 
         $validated = $request->validate([
             'id_users' => ['nullable', Rule::exists('users', 'id_users')],
         ]);
 
-        // Lepaskan MPK lama sekbid ini maupun MPK yang sebelumnya ditugaskan ke sini.
+        // Lepaskan penilai lama sekbid ini maupun penilai yang ditugaskan ke sini.
         User::where('id_sekbid', $divisi->id)->update(['id_sekbid' => null]);
 
         $user = isset($validated['id_users']) ? User::find($validated['id_users']) : null;
@@ -102,7 +162,7 @@ class AdminController extends Controller
         }
 
         return back()->with('success', $user === null
-            ? "Penugasan MPK untuk {$divisi->nama_sekbid} berhasil dikosongkan."
+            ? "Penugasan {$this->site->singkatan} untuk {$divisi->nama_sekbid} berhasil dikosongkan."
             : "{$user->username} kini menangani {$divisi->nama_sekbid}.");
     }
 
