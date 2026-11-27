@@ -37,6 +37,7 @@
                     <li><a href="#progja" class="hover:text-blue-400 transition-colors">Program Kerja</a></li>
                     <li><a href="#penilaian" class="hover:text-blue-400 transition-colors">Hasil Penilaian</a></li>
                     <li><a href="#visimisi" class="hover:text-blue-400 transition-colors">Visi & Misi</a></li>
+                    <li><a href="#dokumentasi" class="hover:text-blue-400 transition-colors">Dokumentasi</a></li>
                 </ul>
             </div>
 

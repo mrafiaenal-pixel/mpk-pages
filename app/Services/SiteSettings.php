@@ -13,6 +13,8 @@ use Illuminate\Support\Collection;
  */
 final class SiteSettings
 {
+    public const MAKSIMAL_CALON_DEFAULT = 5;
+
     /** @var list<array{kode: string, nama: string, deskripsi: string}> */
     public const KOMISI_DEFAULT = [
         ['kode' => 'A', 'nama' => 'Komisi A', 'deskripsi' => 'Tata Kelola Hukum'],
@@ -35,6 +37,7 @@ final class SiteSettings
         public readonly array $misi,
         public readonly Collection $pengurus,
         public readonly Collection $komisi,
+        public readonly int $maksimalCalon,
     ) {}
 
     /**
@@ -70,6 +73,7 @@ final class SiteSettings
             misi: $misi,
             pengurus: $pengurus,
             komisi: $komisi,
+            maksimalCalon: (int) ($profil?->maksimal_calon ?? self::MAKSIMAL_CALON_DEFAULT),
         );
     }
 }

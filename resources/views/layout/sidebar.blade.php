@@ -48,6 +48,24 @@
             </a>
         @endif
 
+        {{-- Anggota (dikelola terpisah dari Profil MPR) --}}
+        @if($memilikiPeran(['admin', 'ketua', 'komc']))
+            <a href="{{ route('admin.anggota.index') }}"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('admin.anggota*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <i class="fa-solid fa-users w-5 text-center text-sm {{ request()->routeIs('admin.anggota*') ? 'text-white' : 'text-slate-400' }}"></i>
+                <span>Anggota</span>
+            </a>
+        @endif
+
+        {{-- Pemilu (semua pengguna yang login) --}}
+        @if($user !== null)
+            <a href="{{ route('admin.pemilu.index') }}"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('admin.pemilu*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <i class="fa-solid fa-vote-big w-5 text-center text-sm {{ request()->routeIs('admin.pemilu*') ? 'text-white' : 'text-slate-400' }}"></i>
+                <span>Pemilu</span>
+            </a>
+        @endif
+
         {{-- Penilaian Kinerja --}}
         {{-- Ketua, Kom C, Guru, Admin, Bendahara, Anggota bisa input/lihat sesuai hak akses --}}
         @if($user !== null)
@@ -104,14 +122,24 @@
         </a>
     </div>
 
-    <!-- Pengaturan Organisasi (Ketua & Kom C) -->
+    <!-- Profil MPR (Ketua & Kom C) -->
     @if($memilikiPeran(['admin', 'ketua', 'komc']))
         <div class="space-y-1 pt-4 border-t border-slate-100">
             <p class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Pengaturan</p>
             <a href="{{ route('admin.pengaturan.index') }}"
                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('admin.pengaturan*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                 <i class="fa-solid fa-gear w-5 text-center text-sm {{ request()->routeIs('admin.pengaturan*') ? 'text-white' : 'text-slate-400' }}"></i>
-                <span>Pengaturan Organisasi</span>
+                <span>Profil MPR</span>
+            </a>
+            <a href="{{ route('admin.calon.index') }}"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('admin.calon*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <i class="fa-solid fa-users-line w-5 text-center text-sm {{ request()->routeIs('admin.calon*') ? 'text-white' : 'text-slate-400' }}"></i>
+                <span>Kelola Calon</span>
+            </a>
+            <a href="{{ route('admin.dokumentasi.index') }}"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('admin.dokumentasi*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                <i class="fa-solid fa-images w-5 text-center text-sm {{ request()->routeIs('admin.dokumentasi*') ? 'text-white' : 'text-slate-400' }}"></i>
+                <span>Foto Dokumentasi</span>
             </a>
         </div>
     @endif

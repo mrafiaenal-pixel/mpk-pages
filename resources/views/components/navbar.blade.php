@@ -34,6 +34,9 @@
                 <a href="#visimisi" class="px-3.5 py-2 text-sm font-semibold text-slate-700 hover:text-blue-600 rounded-lg hover:bg-blue-50/60 transition-colors">
                     Visi Misi
                 </a>
+                <a href="#dokumentasi" class="px-3.5 py-2 text-sm font-semibold text-slate-700 hover:text-blue-600 rounded-lg hover:bg-blue-50/60 transition-colors">
+                    Dokumentasi
+                </a>
             </nav>
 
             <!-- Right CTA Button -->
@@ -92,6 +95,9 @@
         </a>
         <a href="#visimisi" @click="mobileMenuOpen = false" class="block px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
             <i class="fa-solid fa-users w-6 text-slate-400"></i> Visi Misi & Struktur
+        </a>
+        <a href="#dokumentasi" @click="mobileMenuOpen = false" class="block px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+            <i class="fa-solid fa-images w-6 text-slate-400"></i> Dokumentasi
         </a>
         <div class="pt-2 space-y-2">
             <a href="#aspirasi" @click="mobileMenuOpen = false" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs">

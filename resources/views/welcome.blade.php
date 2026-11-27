@@ -575,6 +575,37 @@
             </div>
         </div>
     </section>
+
+    <!-- ==================== DOKUMENTASI KEGIATAN ==================== -->
+    <section id="dokumentasi" class="mk-section">
+        <div class="mk-container">
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <div class="mk-eyebrow justify-center mk-reveal"><span>05</span> / Dokumentasi</div>
+                <h2 class="mk-heading mk-reveal" data-delay="1">Dokumentasi<br><span class="mk-outline">& Kegiatan Sekolah</span></h2>
+                <p class="mk-text mx-auto mt-4 mk-reveal" data-delay="2">
+                    Momen dan kegiatan organisasi yang terdokumentasi untuk seluruh warga sekolah.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                @forelse ($fotoDokumentasi as $foto)
+                    <a href="{{ Storage::url($foto->foto) }}" target="_blank"
+                       class="mk-card mk-reveal overflow-hidden block" title="Lihat foto penuh">
+                        <div class="aspect-video overflow-hidden bg-black/20">
+                            <img src="{{ Storage::url($foto->foto) }}" alt="{{ $foto->judul }}"
+                                 loading="lazy" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                        </div>
+                        <div class="p-4">
+                            <h3 class="mk-card__title">{{ $foto->judul }}</h3>
+                            <p class="mk-card__text">{{ $foto->keterangan ?: 'Dokumentasi kegiatan.' }}</p>
+                        </div>
+                    </a>
+                @empty
+                    <div class="col-span-full mk-empty">Foto dokumentasi belum tersedia.</div>
+                @endforelse
+            </div>
+        </div>
+    </section>
 @endsection
 
 @push('styles')

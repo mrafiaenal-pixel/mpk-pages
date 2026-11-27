@@ -1,6 +1,6 @@
 @extends('layout.admin')
 
-@section('title', 'Pengaturan Organisasi')
+@section('title', 'Profil MPR')
 
 @section('content')
     @php
@@ -18,20 +18,37 @@
         ])->all());
     @endphp
 
-    <div class="space-y-6" x-data="{ pengurus: @json($daftarPengurus) }">
+    <div class="space-y-6" x-data="{ pengurus: @js($daftarPengurus) }">
         <!-- Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Pengaturan Organisasi</h1>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Profil MPR</h1>
                 <p class="text-xs text-slate-500 mt-1">
-                    Atur identitas, visi misi, tiga komisi (A, B, C), dan struktur pengurus yang tampil di seluruh portal.
+                    Atur identitas, visi misi, tiga komisi (A, B, C), dan struktur pengurus MPR yang tampil di seluruh portal.
                 </p>
             </div>
-            <a href="{{ url('/') }}" target="_blank"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-xs transition-all">
-                <i class="fa-solid fa-arrow-up-right-from-square text-slate-500"></i>
-                <span>Lihat Halaman Publik</span>
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('admin.calon.index') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold text-xs shadow-xs transition-all">
+                    <i class="fa-solid fa-vote-big text-blue-600"></i>
+                    <span>Kelola Calon</span>
+                </a>
+                <a href="{{ route('admin.dokumentasi.index') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold text-xs shadow-xs transition-all">
+                    <i class="fa-solid fa-images text-blue-600"></i>
+                    <span>Foto Dokumentasi</span>
+                </a>
+                <a href="{{ route('admin.anggota.index') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold text-xs shadow-xs transition-all">
+                    <i class="fa-solid fa-users text-blue-600"></i>
+                    <span>Kelola Anggota</span>
+                </a>
+                <a href="{{ url('/') }}" target="_blank"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-xs transition-all">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-slate-500"></i>
+                    <span>Lihat Halaman Publik</span>
+                </a>
+            </div>
         </div>
 
         @if ($errors->any())
@@ -161,6 +178,27 @@
                 </div>
             </section>
 
+            <!-- Pengaturan Pemilu -->
+            <section class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+                        <i class="fa-solid fa-vote-big text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-black text-slate-900">Pengaturan Pemilu</h2>
+                        <p class="text-[11px] text-slate-400">Atur kuota calon yang boleh didaftarkan. Kuota yang dikurangi tidak menghapus calon yang sudah ada.</p>
+                    </div>
+                </div>
+
+                <div class="max-w-xs">
+                    <label for="maksimal_calon" class="block text-[11px] font-bold text-slate-500 mb-1">Jumlah Maksimal Calon <span class="text-rose-500">*</span></label>
+                    <input type="number" id="maksimal_calon" name="maksimal_calon" required min="1" max="50"
+                        value="{{ old('maksimal_calon', $site->maksimalCalon) }}"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-hidden">
+                    @error('maksimal_calon') <p class="text-[10px] text-rose-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+            </section>
+
             <!-- Struktur Pengurus -->
             <section class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-5">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -169,8 +207,8 @@
                             <i class="fa-solid fa-users-gear text-sm"></i>
                         </div>
                         <div>
-                            <h2 class="text-sm font-black text-slate-900">Struktur Pengurus</h2>
-                            <p class="text-[11px] text-slate-400">Tambah, ubah, atau hapus pengurus sesuai periode masa bakti.</p>
+                            <h2 class="text-sm font-black text-slate-900">Struktur Pengurus MPR</h2>
+                            <p class="text-[11px] text-slate-400">Tambah, ubah, atau hapus pengurus MPR sesuai periode masa bakti.</p>
                         </div>
                     </div>
                     <button type="button" @click="pengurus.push({ id: '', nama_pengurus: '', jabatan_pengurus: '', komisi_pengurus: 'Pimpinan Inti' })"

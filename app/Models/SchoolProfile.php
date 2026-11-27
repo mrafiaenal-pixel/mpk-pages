@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['nama_sekolah', 'email_sekolah', 'nama_mpk', 'nama_lengkap', 'descripsi_profile', 'komisi'])]
+#[Fillable(['nama_sekolah', 'email_sekolah', 'nama_mpk', 'nama_lengkap', 'descripsi_profile', 'komisi', 'maksimal_calon'])]
 class SchoolProfile extends Model
 {
     use HasFactory;
@@ -27,6 +27,7 @@ class SchoolProfile extends Model
         'nama_lengkap',
         'descripsi_profile',
         'komisi',
+        'maksimal_calon',
     ];
 
     /**

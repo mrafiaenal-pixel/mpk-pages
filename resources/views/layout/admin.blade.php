@@ -128,6 +128,19 @@
                     </div>
                 @endif
 
+                @if(session('error'))
+                    <div x-data="{ show: true }" x-show="show"
+                         class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center justify-between shadow-xs">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+                            <span>{{ session('error') }}</span>
+                        </div>
+                        <button @click="show = false" class="text-rose-600 hover:text-rose-800">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                @endif
+
                 @yield('content')
             </main>
         </div>

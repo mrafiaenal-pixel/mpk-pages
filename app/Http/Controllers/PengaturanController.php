@@ -21,7 +21,7 @@ class PengaturanController extends Controller
     }
 
     /**
-     * Simpan identitas, visi misi, komisi, dan struktur pengurus.
+     * Simpan identitas, visi misi, komisi, kuota calon, dan struktur pengurus.
      */
     public function update(UpdateSiteSettingsRequest $request): RedirectResponse
     {
@@ -36,6 +36,7 @@ class PengaturanController extends Controller
                 'nama_lengkap' => $data['nama_lengkap'],
                 'descripsi_profile' => $data['descripsi_profile'] ?? null,
                 'komisi' => array_values($data['komisi']),
+                'maksimal_calon' => $data['maksimal_calon'],
             ]);
             $profil->save();
 
@@ -64,7 +65,9 @@ class PengaturanController extends Controller
                 $keptIds[] = $pengurus->getKey();
             }
 
-            ProfilKepengurusan::query()->whereNotIn('id', $keptIds)->delete();
+            if ($keptIds !== []) {
+                ProfilKepengurusan::query()->whereNotIn('id', $keptIds)->delete();
+            }
         });
 
         return redirect()->route('admin.pengaturan.index')

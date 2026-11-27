@@ -1,12 +1,16 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\AspirationController;
 use App\Http\Controllers\AspirationManagementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BendaharaController;
+use App\Http\Controllers\CalonPemiluController;
 use App\Http\Controllers\DailyLifeController;
 use App\Http\Controllers\DivisionMemberController;
+use App\Http\Controllers\FotoDokumentasiController;
+use App\Http\Controllers\PemiluController;
 use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\ProfileController;
@@ -14,6 +18,7 @@ use App\Http\Controllers\RekapController;
 use App\Http\Controllers\WorkProgramController;
 use App\Models\Aspiration;
 use App\Models\Division;
+use App\Models\FotoDokumentasi;
 use App\Models\KategoriAspirasi;
 use App\Models\WorkProgram;
 use Illuminate\Support\Facades\Route;
@@ -36,8 +41,9 @@ Route::get('/', function () {
     $sekbids = Division::with('members')->get();
     $progjas = WorkProgram::latest()->take(6)->get();
     $recentAspirasi = Aspiration::latest('id_aspirasi')->take(3)->get();
+    $fotoDokumentasi = FotoDokumentasi::query()->latest()->take(8)->get();
 
-    return view('welcome', compact('kategoris', 'sekbids', 'progjas', 'recentAspirasi'));
+    return view('welcome', compact('kategoris', 'sekbids', 'progjas', 'recentAspirasi', 'fotoDokumentasi'));
 })->name('home');
 
 Route::post('/aspirasi', [AspirationController::class, 'store'])
@@ -61,12 +67,31 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/daily-life', [DailyLifeController::class, 'index'])->name('daily-life.index');
     Route::post('/daily-life', [DailyLifeController::class, 'store'])->name('daily-life.store');
     Route::delete('/daily-life/{dailyLife}', [DailyLifeController::class, 'destroy'])->name('daily-life.destroy');
+
+    // Pemilu: semua pengguna yang login boleh melihat calon dan memilih satu calon.
+    Route::get('/pemilu', [PemiluController::class, 'index'])->name('pemilu.index');
+    Route::post('/pemilu/vote', [PemiluController::class, 'vote'])->name('pemilu.vote');
 });
 
-// Pengaturan organisasi: ketua & komc (admin otomatis diizinkan oleh middleware role)
+// Profil MPR dan anggota: ketua & komc (admin otomatis diizinkan oleh middleware role)
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:ketua,komc'])->group(function () {
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::put('/pengaturan', [PengaturanController::class, 'update'])->name('pengaturan.update');
+
+    Route::get('/anggota', [AnggotaController::class, 'index'])->name('anggota.index');
+    Route::post('/anggota', [AnggotaController::class, 'store'])->name('anggota.store');
+    Route::delete('/anggota/{member}', [AnggotaController::class, 'destroy'])->name('anggota.destroy');
+
+    // Kelola calon pemilu dan foto dokumentasi kegiatan.
+    Route::get('/calon', [CalonPemiluController::class, 'index'])->name('calon.index');
+    Route::post('/calon', [CalonPemiluController::class, 'store'])->name('calon.store');
+    Route::put('/calon/{calon}', [CalonPemiluController::class, 'update'])->name('calon.update');
+    Route::delete('/calon/{calon}', [CalonPemiluController::class, 'destroy'])->name('calon.destroy');
+
+    Route::get('/dokumentasi', [FotoDokumentasiController::class, 'index'])->name('dokumentasi.index');
+    Route::post('/dokumentasi', [FotoDokumentasiController::class, 'store'])->name('dokumentasi.store');
+    Route::put('/dokumentasi/{fotoDokumentasi}', [FotoDokumentasiController::class, 'update'])->name('dokumentasi.update');
+    Route::delete('/dokumentasi/{fotoDokumentasi}', [FotoDokumentasiController::class, 'destroy'])->name('dokumentasi.destroy');
 });
 
 // API routes for chart visualization
